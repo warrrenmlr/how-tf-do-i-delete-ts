@@ -3,7 +3,7 @@
 local environment = identifyexecutor and identifyexecutor()
 local source = game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/source.lua")
 
-if getfflag and ((getfflag("DebugRunParallelLuaOnMainThread") == "True") or getfflag("DebugRunParallelLuaOnMainThread")) and not executed then
+if getfflag and string.find(string.lower(tostring(getfflag("DebugRunParallelLuaOnMainThread"))), "true")) and not executed then
     loadstring(source)()
 elseif environment == "Wave" and not executed then
     run_on_actor(getdeletedactors()[1], source)
