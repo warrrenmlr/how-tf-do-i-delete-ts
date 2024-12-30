@@ -9,8 +9,8 @@
     [ Drawing Library ] - [ Line 47 ]
     [ UI Library ] - [ Line 1053 ]
     [ Cham Library ] - [ Line 2630 ]
-    [ Main Cheat ] - [ Line 2684 ]
-    [ Make UI ] - [ Line 5496 ]
+    [ Main Cheat ] - [ Line 2686 ]
+    [ Make UI ] - [ Line 5513 ]
 
     ~ Credits ~
 
@@ -2631,32 +2631,34 @@ do -- Cham Library
     local cache = {}
 
     function cham.new(model, properties, hideParts, deleteImages, ignoreTransparency)
-        properties = properties or {}
-        local controlled = {}
-        local data = {model = model, parts = controlled, properties = properties, ignore = ignoreTransparency, hide = (type(hideParts) == "table" and hideParts)}
-        local parts = model:GetDescendants()
-        table.insert(parts, model)
-        table.insert(cache, data)
+        if model then
+            properties = properties or {}
+            local controlled = {}
+            local data = {model = model, parts = controlled, properties = properties, ignore = ignoreTransparency, hide = (type(hideParts) == "table" and hideParts)}
+            local parts = model:GetDescendants()
+            table.insert(parts, model)
+            table.insert(cache, data)
 
-        local function uncache()
-            table.remove(cache, table.find(cache, data))
-        end
-        
-        local function classify(part)
-            if part:IsA("BasePart") then
-                table.insert(controlled, part)
-            elseif deleteImages and (part.ClassName == "Decal" or part.ClassName == "Texture") then
-                part:Destroy()
+            local function uncache()
+                table.remove(cache, table.find(cache, data))
             end
+            
+            local function classify(part)
+                if part:IsA("BasePart") then
+                    table.insert(controlled, part)
+                elseif deleteImages and (part.ClassName == "Decal" or part.ClassName == "Texture") then
+                    part:Destroy()
+                end
+            end
+            
+            for _, part in parts do
+                classify(part)
+            end
+            
+            table.insert(connectionList, model.DescendantAdded:Connect(classify))
+            
+            return properties, uncache
         end
-        
-        for _, part in parts do
-            classify(part)
-        end
-        
-        table.insert(connectionList, model.DescendantAdded:Connect(classify))
-        
-        return properties, uncache
     end
 
     table.insert(connectionList, game:GetService("RunService").RenderStepped:Connect(function()
@@ -2737,6 +2739,8 @@ LPH_JIT_MAX(function() -- Main Cheat
     local crosshairsInterface = modules.HudCrosshairsInterface
 
     local networkConnections = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
+    getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
+    getfenv(cameraInterface.setCameraType).warn = function() end
     
     local players = game:GetService("Players")
     local lighting = game:GetService("Lighting")
@@ -3132,11 +3136,13 @@ LPH_JIT_MAX(function() -- Main Cheat
                 if name == "equip" then
                     local slot = ...
 
+                    fakeRepObject:setActiveIndex(slot)
                     if slot ~= 3 then
                         currentObj:equip(slot)
                     else
                         currentObj:equipMelee()
                     end
+                    --currentObj.canRenderWeapon = true--:renderWeapon()
                 elseif name == "stab" then
                     currentObj:stab()
                 elseif name == "aim" then
@@ -3434,16 +3440,16 @@ LPH_JIT_MAX(function() -- Main Cheat
     local preparePickUpFirearm = weaponObject.preparePickUpFirearm
     function weaponObject:preparePickUpFirearm(slot, name, attachments, attData, camoData, magAmmo, spareAmmo, newId, wasClient, ...)
         local wepData = {
-            Name = name,
-            Attachments = attachments,
-            AttData = addData,
-            Camo = camoData
+            weaponName = name,
+            weaponAttachments = attachments,
+            weaponAttData = addData,
+            weaponCamo = camoData
         }
 
+        fakeRepObject:setActiveIndex(slot)
         fakeRepObject:swapWeapon(slot, wepData)
-
         if currentObj then
-            currentObj:replaceWeapon(slot, wepData)
+            currentObj:buildWeapon(slot)
         end
         
         return preparePickUpFirearm(self, slot, name, attachments, attData, camoData, magAmmo, spareAmmo, newId, wasClient, ...)
@@ -3452,14 +3458,14 @@ LPH_JIT_MAX(function() -- Main Cheat
     local preparePickUpMelee = weaponObject.preparePickUpMelee
     function weaponObject:preparePickUpMelee(name, camoData, newId, wasClient, ...)
         local wepData = {
-            Name = name,
-            Camo = camoData
+            weaponName = name,
+            weaponCamo = camoData
         }
 
+        fakeRepObject:setActiveIndex(3)
         fakeRepObject:swapWeapon(3, wepData)
-
         if currentObj then
-            currentObj:replaceWeapon(3, wepData)
+            currentObj:buildWeapon(3)
         end
         
         return preparePickUpMelee(self, name, camoData, newId, wasClient, ...)
@@ -4319,16 +4325,18 @@ LPH_JIT_MAX(function() -- Main Cheat
                     Color = wapus:GetValue("Chams", prefix .. "Color")
                 }, false, true, false)
 
-                local storage = arm and arms or weapons
-                table.insert(storage, properties)
+                if properties then
+                    local storage = arm and arms or weapons
+                    table.insert(storage, properties)
 
-                local parentConnection; parentConnection = model:GetPropertyChangedSignal("Parent"):Connect(function()
-                    if model.Parent ~= camera then
-                        uncache()
-                        parentConnection:Disconnect()
-                        table.remove(storage, table.find(storage, properties))
-                    end
-                end)
+                    local parentConnection; parentConnection = model:GetPropertyChangedSignal("Parent"):Connect(function()
+                        if model.Parent ~= camera then
+                            uncache()
+                            parentConnection:Disconnect()
+                            table.remove(storage, table.find(storage, properties))
+                        end
+                    end)
+                end
             end
         end
     end))
@@ -5104,6 +5112,10 @@ LPH_JIT_MAX(function() -- Main Cheat
                         local classData = playerClient.getPlayerData().settings.classdata
                         fakeRepObject:spawn(nil, classData[classData.curclass])
                         currentObj = fakeRepObject._thirdPersonObject
+                        fakeRepObject:setActiveIndex(1)
+                        currentObj:buildWeapon(1)
+                        currentObj:buildWeapon(2)
+                        currentObj:buildWeapon(3)
 
                         if wapus:GetValue("More Chams", "Third Person Character Chams") then
                             task.delay(0.15, function()
@@ -5140,6 +5152,9 @@ LPH_JIT_MAX(function() -- Main Cheat
                     fakeRepObject._receivedFrameTime = network.getTime()
                     fakeRepObject._lastPacketTime = clockTime
                     fakeRepObject:step(3, true)
+                    if currentObj then
+                        currentObj.canRenderWeapon = true
+                    end
                     lastTime = clockTime
                     started = false
 
@@ -5296,7 +5311,9 @@ LPH_JIT_MAX(function() -- Main Cheat
                             end
 
                             clone:Destroy()
-                            uncache() -- you would not believe the lag
+                            if uncache then
+                                uncache() -- you would not believe the lag
+                            end
                         end)
                     end
                 end)
