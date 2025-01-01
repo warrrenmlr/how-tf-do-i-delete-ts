@@ -8,9 +8,9 @@
 
     [ Drawing Library ] - [ Line 47 ]
     [ UI Library ] - [ Line 1053 ]
-    [ Cham Library ] - [ Line 2630 ]
-    [ Main Cheat ] - [ Line 2686 ]
-    [ Make UI ] - [ Line 5513 ]
+    [ Cham Library ] - [ Line 2646 ]
+    [ Main Cheat ] - [ Line 2702 ]
+    [ Make UI ] - [ Line 5572 ]
 
     ~ Credits ~
 
@@ -2049,6 +2049,22 @@ do -- UI Library
                     typing:SetValue(text)
                     typing = false
                     return
+                elseif key == "V" and (userInputService:IsKeyDown(Enum.KeyCode.LeftControl) or userInputService:IsKeyDown(Enum.KeyCode.RightControl)) and keypress and keyrelease then
+                    task.spawn(function()
+                        local screenGui = Instance.new("ScreenGui", game.CoreGui) -- erm is this iray code?
+                        local textBox = Instance.new("TextBox", screenGui) -- first person to tell iray where this is pasted from with proof gets a free nihon key
+                        textBox.TextTransparency = 1
+                        textBox:CaptureFocus()
+                        keypress(0x11)  
+                        keypress(0x56)
+                        task.wait()
+                        keyrelease(0x11)
+                        keyrelease(0x56)
+                        textBox:ReleaseFocus()
+                        text = text .. textBox.Text
+                        textBox:Destroy()
+                        screenGui:Destroy()
+                    end)
                 else
                     local lower = not userInputService:IsKeyDown(Enum.KeyCode.LeftShift) and not userInputService:IsKeyDown(Enum.KeyCode.RightShift)
 
@@ -2739,8 +2755,11 @@ LPH_JIT_MAX(function() -- Main Cheat
     local crosshairsInterface = modules.HudCrosshairsInterface
 
     local networkConnections = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
-    getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
-    getfenv(cameraInterface.setCameraType).warn = function() end
+
+    if getfenv then
+        getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
+        getfenv(cameraInterface.setCameraType).warn = function() end
+    end
     
     local players = game:GetService("Players")
     local lighting = game:GetService("Lighting")
@@ -2795,7 +2814,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
     astar.maxtime = 0.33
     astar.interval = 12  --  8 to 16 is good
-    astar.ignorelist = {workspace.Players, camera, ignore}
+    astar.ignorelist = {workspace.Players, camera, ignore, hitboxObjects, backtrackObjects}
 
     local controlledParts = {}
     local function hookPart(part)
@@ -2820,7 +2839,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         hookModel(model)
     end
 
-    local physicsignore = {workspace.Terrain, ignore, workspace.Players, camera}
+    local physicsignore = {workspace.Terrain, ignore, workspace.Players, camera, hitboxObjects, backtrackObjects}
     local raycastparameters = RaycastParams.new()
     local function raycast(origin, direction, filterlist, whitelist)
         raycastparameters.IgnoreWater = true
@@ -5046,6 +5065,41 @@ LPH_JIT_MAX(function() -- Main Cheat
         espInterface.teamSettings.friendly.chamsVisibleOnly = state
     end
 
+    local customModel
+    callbackList["Custom Model%%Asset ID"] = function(state)
+        if wapus:GetValue("Custom Model", "Custom Character Model") then
+            if customModel then
+                customModel.Parent = nil
+            end
+
+            if state then
+                local modelId = "rbxassetid://" .. string.gsub(state, "rbxassetid://", "")
+                customModel = game:GetObjects(modelId)
+        
+                if (not customModel) or (not customModel[1]) or (type(customModel[1]) ~= "userdata") then
+                    customModel = nil
+                else
+                    customModel = customModel[1]
+                    local part = customModel.ClassName == "Model" and customModel.PrimaryPart or customModel
+                    part.Anchored = true
+                    part.CanCollide = false
+                    customModel.Parent = ignore
+                end
+            end
+        end
+    end
+    callbackList["Custom Model%%Asset ID"](wapus:GetValue("Custom Model", "Asset ID"))
+
+    callbackList["Custom Model%%Custom Character Model"] = function(state)
+        if not state then
+            if customModel then
+                customModel.Parent = nil
+            end
+        else
+            callbackList["Custom Model%%Asset ID"](wapus:GetValue("Custom Model", "Asset ID"))
+        end
+    end
+
     local objectChamUncache
     local backtrackTime = 0
     local lastRandom = 0
@@ -5081,6 +5135,11 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
 
             controlledParts = parts
+        end
+
+        if customModel and rootPart then
+            local part = customModel.ClassName == "Model" and customModel.PrimaryPart or customModel
+            customModel.CFrame = rootPart.CFrame * CFrame.new(wapus:GetValue("Custom Model", "Asset Offset X"), wapus:GetValue("Custom Model", "Asset Offset Y"), wapus:GetValue("Custom Model", "Asset Offset Z"))
         end
 
         replicationInterface.operateOnAllEntries(function(player, entry)
@@ -5748,6 +5807,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local morechams = chams:AddSection("More Chams")
     local worldvisuals = chams:AddSection("World Visuals")
     local thirdperson = visuals:CreateSection("Third Person", true, "half")
+    local customChar = thirdperson:AddSection("Custom Model")
     local crosshair = thirdperson:AddSection("Crosshair")
 
     local movement = misc:CreateSection("Movement", false, "half")
@@ -5929,7 +5989,13 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     thirdperson:AddSlider("Camera Offset Z", 7, -20, 20, 1, " Studs", getCallback("Third Person%%Camera Offset Z"))
     thirdperson:AddToggle("Camera Offset Always Visible", true, getCallback("Third Person%%Camera Offset Always Visible"))
     thirdperson:AddToggle("Apply Anti Aim To Character", true, getCallback("Third Person%%Apply Anti Aim To Character"))
-    
+
+    customChar:AddToggle("Custom Character Model", false, getCallback("Custom Model%%Custom Character Model")):AddKeyBind(nil, "Key Bind")
+    customChar:AddTextBox("Asset ID", "ID", getCallback("Custom Model%%Asset ID"))
+    customChar:AddSlider("Asset Offset X", 0, -10, 10, 0.2, " Studs", getCallback("Custom Model%%Asset Offset X"))
+    customChar:AddSlider("Asset Offset Y", 0, -10, 10, 0.2, " Studs", getCallback("Custom Model%%Asset Offset Y"))
+    customChar:AddSlider("Asset Offset Z", 0, -10, 10, 0.2, " Studs", getCallback("Custom Model%%Asset Offset Z"))
+
     crosshair:AddToggle("Enabled", false, getCallback("Crosshair%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Crosshair Color", Color3.new(0.1, 0.1, 1), getCallback("Crosshair%%Crosshair Color"))
     crosshair:AddToggle("Show Dot", false, getCallback("Crosshair%%Show Dot"))
     crosshair:AddToggle("Follow Recoil", false, getCallback("Crosshair%%Follow Recoil"))
