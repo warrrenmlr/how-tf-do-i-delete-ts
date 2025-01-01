@@ -30,7 +30,7 @@ elseif environment == "Nihon" and not executed then
         ]])
     end
 else
-    queue_on_teleport("task.wait(5);" .. source)
+    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/hook.lua") .. "task.wait(5);" .. source)
     setfflag("DebugRunParallelLuaOnMainThread", "True")
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 end
