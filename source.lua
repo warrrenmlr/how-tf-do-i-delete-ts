@@ -6,11 +6,11 @@
 
     ~ Index ~
 
-    [ Drawing Library ] - [ Line 47 ]
-    [ UI Library ] - [ Line 1053 ]
-    [ Cham Library ] - [ Line 2646 ]
-    [ Main Cheat ] - [ Line 2702 ]
-    [ Make UI ] - [ Line 5572 ]
+    [ Drawing Library ] - [ Line 118 ]
+    [ UI Library ] - [ Line 1124 ]
+    [ Cham Library ] - [ Line 2717 ]
+    [ Main Cheat ] - [ Line 2773 ]
+    [ Make UI ] - [ Line 5643 ]
 
     ~ Credits ~
 
@@ -41,6 +41,77 @@ local customAudios = {}
 local cham = {}
 local unloadMain
 local wapus
+
+
+local userName = game:GetService("Players").LocalPlayer.Name
+local fileName = tostring(game.JobId) .. ".txt"
+if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folderName .. "/cache/votekick data") and isfile(folderName .. "/cache/votekick data/" .. fileName) and readfile(folderName .. "/cache/votekick data/" .. fileName) ~= userName then
+    print("loading bot")
+    local hostName = readfile("Phantom Forces Cheat/cache/votekick data/" .. tostring(game.JobId) .. ".txt")
+    local modules, require_module
+
+    for _, func in getgc(false) do
+        if type(func) == "function" and islclosure(func) and debug.getinfo(func).name == "require" and string.find(debug.getinfo(func).source, "ClientLoader") then
+            require_module = func
+            modules = {}
+
+            for moduleName, moduleCache in debug.getupvalue(func, 1)._cache do
+                modules[moduleName] = moduleCache.module
+            end
+
+            break
+        end
+    end
+
+    local network = modules.NetworkClient
+    local votekick = modules.VoteKickInterface
+    local charEvents = modules.CharacterEvents
+    local charInterface = modules.CharacterInterface
+    local roundSystem = modules.RoundSystemClientInterface
+
+    local clientEvents = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
+
+    print(hostName, clientEvents)
+
+    local function isKickInProgress()
+        return debug.getupvalue(votekick.vote, 1)
+    end
+
+    local console = clientEvents.console
+    function clientEvents.console(message)
+        task.spawn(function()
+            if string.find(message, "has initiated a votekick on") then
+                local initiator = string.split(message, " has initiated")[1]
+                local victim = string.split(string.split(message, "initiated a votekick on ")[2], " for ")[1]
+                print("'" .. initiator .. "'", "'" .. victim .. "'")
+                
+                repeat task.wait() until isKickInProgress()
+
+                if victim == hostName then -- meanie tried to votekick u
+                    votekick.vote("no")
+                    print("i voted nno")
+                elseif initiator == hostName then
+                    votekick.vote("yes") -- troll
+                    print("i voted yee")
+                end
+            end
+        end)
+        
+        return console(message)
+    end
+
+    repeat 
+        repeat task.wait() until not roundSystem.roundLock
+        charInterface.spawn()
+        repeat task.wait() until charInterface.isAlive() and charInterface.getCharacterObject() and charInterface.getCharacterObject():canJump()
+        charInterface.getCharacterObject():jump(4)
+        task.wait(5)
+        network:send("forcereset")
+        task.wait(3.1)
+    until nil
+
+    --game:GetService("RunService"):Set3dRenderingEnabled(false) -- increase performance              bruh why this doesnt work on nihon idk if it works on other executors
+end
 
 LPH_NO_VIRTUALIZE(function()
 workspace:FindFirstChild("nigga stop deobfuscating my script you black monkey nigger - iray") -- theres this bitch nigga named isse (@723741691583922209)
@@ -5584,6 +5655,12 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
         makefolder(folderName .. "/cache")
     end
 
+    if not isfolder(folderName .. "/cache/votekick data") then
+        makefolder(folderName .. "/cache/votekick data")
+    end
+
+    --writefile(folderName .. "/cache/votekick data/" .. fileName, userName)
+
     if not isfile(folderName .. "/cache/servers.json") then
         writefile(folderName .. "/cache/servers.json", httpService:JSONEncode({}))
     end
@@ -5813,10 +5890,11 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local movement = misc:CreateSection("Movement", false, "half")
     local sounds = misc:CreateSection("Sounds", false, "half")
     local tweaks = misc:CreateSection("Tweaks", true, "third")
+    local antivotekick = tweaks:AddSection("Anti Votekick")
     local chatspam = misc:CreateSection("Chat Spam", true, "third")
     local hopper = misc:CreateSection("Server Hopper", true, "third")
     --local votekick = hopper:AddSection("Votekick")
-
+    
     aimbot:AddToggle("Enabled", false, getCallback("Aim Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     aimbot:AddToggle("Visible Check", false, getCallback("Aim Bot%%Visible Check"))
     aimbot:AddSlider("Smoothness", 0, 0, 0.99, 0.01, "x", getCallback("Aim Bot%%Smoothness"))
@@ -6032,12 +6110,20 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     tweaks:AddButton("Unlock All Camos", getCallback("Tweaks%%Unlock All Camos"))
     tweaks:AddButton("Unlock All", getCallback("Tweaks%%Unlock All"))
 
+    antivotekick:AddButton("Initiate Multi-Instance Anti Votekick", function()
+        writefile(folderName .. "/cache/votekick data/" .. fileName, userName)
+    end)
+
+    antivotekick:AddButton("Copy YouTube Tutorial Link", function()
+        setclipboard("https://youtu.be/dvyiz8iVe5g")
+    end)
+
     chatspam:AddToggle("Enabled", false, getCallback("Chat Spam%%Enabled")):AddKeyBind(nil, "Key Bind")
     chatspam:AddDropdown("Spam List", "default.txt", chatListsFiles, getCallback("Chat Spam%%Spam List"))
     chatspam:AddSlider("Spam Delay", 2.51, 2.51, 5, 0.01, " Seconds", getCallback("Chat Spam%%Spam Delay"))
     chatspam:AddToggle("Team Chat", false, getCallback("Chat Spam%%Team Chat"))
 
-    hopper:AddToggle("Server Hop On Votekick", false, getCallback("Server Hopper%%Server Hop On Votekick"))
+    --hopper:AddToggle("Server Hop On Votekick", false, getCallback("Server Hopper%%Server Hop On Votekick"))
     hopper:AddButton("Server Hop", getCallback("Server Hopper%%Server Hop"))
     hopper:AddButton("Rejoin", getCallback("Server Hopper%%Rejoin"))
     hopper:AddButton("Copy Join Script", getCallback("Server Hopper%%Copy Join Script"))
