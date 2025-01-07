@@ -17,6 +17,8 @@ for _, object in screenGui:GetDescendants() do
     object.Size = UDim2.new(0, size.X * scale, 0, size.Y * scale)
 end
 
+textbox.TextSize = textbox.TextSize * scale
+
 main.Active = true
 main.Draggable = true
 scroll.BorderSizePixel = 1
