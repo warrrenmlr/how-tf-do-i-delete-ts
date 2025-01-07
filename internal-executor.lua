@@ -1,6 +1,6 @@
 -- i made this for using multi instance when there is no internal executor
-local keyBind = "RightControl"
-local scale = 0.66
+local keyBind = getgenv().executorKeyBind or "RightControl"
+local scale = getgenv().executorScale or 0.66
 
 local screenGui = game:GetObjects("rbxassetid://76806698067626")[1]
 screenGui.Parent = gethui() or game:GetService("CoreGui")
