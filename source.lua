@@ -6,11 +6,11 @@
 
     ~ Index ~
 
-    [ Drawing Library ] - [ Line 118 ]
-    [ UI Library ] - [ Line 1124 ]
-    [ Cham Library ] - [ Line 2717 ]
-    [ Main Cheat ] - [ Line 2773 ]
-    [ Make UI ] - [ Line 5643 ]
+    [ Drawing Library ] - [ Line 111 ]
+    [ UI Library ] - [ Line 1117 ]
+    [ Cham Library ] - [ Line 2710 ]
+    [ Main Cheat ] - [ Line 2766 ]
+    [ Make UI ] - [ Line 5631 ]
 
     ~ Credits ~
 
@@ -31,7 +31,7 @@ end
 LPH_JIT_MAX = LPH_NO_VIRTUALIZE
 
 local devMode = true
-local defaultUIName = "Wapus"
+local defaultUIName = "Wapus.Shop" -- $$$
 local folderName = "Phantom Forces Cheat"
 local connectionList = {}
 local callbackList = {}
@@ -42,11 +42,10 @@ local cham = {}
 local unloadMain
 local wapus
 
-
+-- anti votekick bot code
 local userName = game:GetService("Players").LocalPlayer.Name
 local fileName = tostring(game.JobId) .. ".txt"
 if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folderName .. "/cache/votekick data") and isfile(folderName .. "/cache/votekick data/" .. fileName) and readfile(folderName .. "/cache/votekick data/" .. fileName) ~= userName then
-    print("loading bot")
     local hostName = readfile("Phantom Forces Cheat/cache/votekick data/" .. tostring(game.JobId) .. ".txt")
     local modules, require_module
 
@@ -65,13 +64,12 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
 
     local network = modules.NetworkClient
     local votekick = modules.VoteKickInterface
-    local charEvents = modules.CharacterEvents
     local charInterface = modules.CharacterInterface
     local roundSystem = modules.RoundSystemClientInterface
 
     local clientEvents = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
-
-    print(hostName, clientEvents)
+    
+    game:GetService("RunService"):Set3dRenderingEnabled(false) -- increase performance              bruh why this doesnt work on nihon idk if it works on other executors
 
     local function isKickInProgress()
         return debug.getupvalue(votekick.vote, 1)
@@ -83,16 +81,13 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
             if string.find(message, "has initiated a votekick on") then
                 local initiator = string.split(message, " has initiated")[1]
                 local victim = string.split(string.split(message, "initiated a votekick on ")[2], " for ")[1]
-                print("'" .. initiator .. "'", "'" .. victim .. "'")
                 
                 repeat task.wait() until isKickInProgress()
 
                 if victim == hostName then -- meanie tried to votekick u
                     votekick.vote("no")
-                    print("i voted nno")
                 elseif initiator == hostName then
                     votekick.vote("yes") -- troll
-                    print("i voted yee")
                 end
             end
         end)
@@ -109,8 +104,6 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
         network:send("forcereset")
         task.wait(3.1)
     until nil
-
-    --game:GetService("RunService"):Set3dRenderingEnabled(false) -- increase performance              bruh why this doesnt work on nihon idk if it works on other executors
 end
 
 LPH_NO_VIRTUALIZE(function()
@@ -2128,7 +2121,7 @@ do -- UI Library
                         textBox:CaptureFocus()
                         keypress(0x11)  
                         keypress(0x56)
-                        task.wait()
+                        task.wait(1/60)
                         keyrelease(0x11)
                         keyrelease(0x56)
                         textBox:ReleaseFocus()
@@ -2887,29 +2880,6 @@ LPH_JIT_MAX(function() -- Main Cheat
     astar.interval = 12  --  8 to 16 is good
     astar.ignorelist = {workspace.Players, camera, ignore, hitboxObjects, backtrackObjects}
 
-    local controlledParts = {}
-    local function hookPart(part)
-        if (part:IsA("BasePart") or part:IsA("Decal")) and part.Transparency < 1 then
-        --if (part:IsA("BasePart")) and (part.ClassName ~= "Part" or part.Transparency < 1) then
-            table.insert(controlledParts, part)
-        end
-    end
-
-    local function hookModel(model)
-        for _, part in next, model:GetDescendants() do
-            hookPart(part)
-            part.ChildAdded:Connect(hookPart)
-        end
-
-        model.ChildAdded:Connect(hookPart)
-    end
-
-    table.insert(connectionList, camera.ChildAdded:Connect(hookModel))
-
-    for _, model in next, camera:GetChildren() do
-        hookModel(model)
-    end
-
     local physicsignore = {workspace.Terrain, ignore, workspace.Players, camera, hitboxObjects, backtrackObjects}
     local raycastparameters = RaycastParams.new()
     local function raycast(origin, direction, filterlist, whitelist)
@@ -3101,6 +3071,10 @@ LPH_JIT_MAX(function() -- Main Cheat
     
         return {origin}
     end
+
+    local bulletIgnoreList = debug.getupvalue(bulletcheck, 4)
+    table.insert(bulletIgnoreList, hitboxObjects) -- only adding this fix cuz sirmeme ran into this bug on stream lmao
+    table.insert(bulletIgnoreList, backtrackObjects) -- robloxscripts.com WWWWWW
     
     local raycastStep = 1 / 30 -- 60 for more accuracy
     local function scanPositions(origin, target, accel, speed, penetration)
@@ -3244,7 +3218,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 elseif name == "stance" then
                     local stance = ...
 
-                    if (not wapus:GetValue("Anti Aim", "Enabled") or not wapus:GetValue("Anti Aim", "Force Stance") or not wapus:GetValue("Third Person", "Apply Anti Aim To Character")) and currentObj then
+                    if (not wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") or not wapus:GetValue("Anti Aim", "Force Stance") or not wapus:GetValue("Third Person", "Apply Anti Aim To Character")) and currentObj then
                         currentObj:setStance(stance)
                     end
                 elseif name == "newbullets" then
@@ -3349,11 +3323,11 @@ LPH_JIT_MAX(function() -- Main Cheat
                 return
             end
 
-            if wapus:GetValue("Anti Aim", "Enabled") then
+            if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") then
                 angles = applyAAAngles(angles)
             end
             
-            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate") then
+            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
                 newSpawnCache.lastOffsetUpdate = newSpawnCache.lastOffsetUpdate or time
 
                 if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
@@ -3373,7 +3347,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 newSpawnCache.lastOffsetUpdate = time
             end
 
-            local fly = wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate"))
+            local fly = wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)"))
             if fly and newSpawnCache.lastUpdate then
                 if not newSpawnCache.lastFlyUpdate or ((clockTime - newSpawnCache.lastFlyUpdate) > flyUpdateDelay) then
                     newSpawnCache.lastFlyUpdate = clockTime
@@ -3404,7 +3378,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
 
             if wapus:GetValue("Silent Aim", "Enabled") and (wapus:GetValue("Silent Aim", "Hit Chance") >= chanceOne) then
-                local target, entry, part = getClosest(silentaimfov.Position, wapus:GetValue("Silent Aim", "Use FOV") and wapus:GetValue("Silent Aim", "FOV Radius"), wapus:GetValue("Silent Aim", "Use Dead FOV") and wapus:GetValue("Silent Aim", "Dead FOV Radius"), wapus:GetValue("Silent Aim", "Visible Check"), (wapus:GetValue("Silent Aim", "Head Shot Chance") >= chanceTwo) and "Head" or "Torso")
+                local target, entry, part = getClosest(silentaimfov.Position, wapus:GetValue("Silent Aim", "Use FOV") and silentaimfov.Radius, wapus:GetValue("Silent Aim", "Use Dead FOV") and silentaimdeadfov.Radius, wapus:GetValue("Silent Aim", "Visible Check"), (wapus:GetValue("Silent Aim", "Head Shot Chance") >= chanceTwo) and "Head" or "Torso")
 
                 if target then
                     local player = entry._player
@@ -3452,7 +3426,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             local a, b, c = ...
             newSpawnCache.hasPinged = true
             
-            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate") then -- idk if this needs to be here i think it helps a little
+            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then -- idk if this needs to be here i think it helps a little
                 if newSpawnCache.lastUpdate and newSpawnCache.lastOffsetUpdate then
                     local time = network.getTime()
                     if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
@@ -3474,7 +3448,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             local add = newSpawnCache.latency + newSpawnCache.currentAddition
             return send(self, name, a, b + add, c + add)
-        elseif name == "changeCamo" and unlockCamos then
+        elseif name == "changeCamo" and unlockCamos then -- ok so why is unlock all camos server side?
             local wepClass, slot, camoName = ...
             return
         elseif name == "changeAttachment" and unlockAttachments then
@@ -3511,7 +3485,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             return
         end
 
-        if wapus:GetValue("Anti Aim", "Enabled") then
+        if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") then
             if name == "stance" and wapus:GetValue("Anti Aim", "Force Stance") then
                 local stance = ...
                 stance = string.lower(wapus:GetValue("Anti Aim", "Set Stance"))
@@ -3539,7 +3513,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         fakeRepObject:setActiveIndex(slot)
         fakeRepObject:swapWeapon(slot, wepData)
         if currentObj then
-            currentObj:buildWeapon(slot)
+            currentObj:buildWeapon(slot) -- does this func even do anything? im not gonna try removing it
         end
         
         return preparePickUpFirearm(self, slot, name, attachments, attData, camoData, magAmmo, spareAmmo, newId, wasClient, ...)
@@ -3621,7 +3595,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
 
             if wapus:GetValue("Silent Aim", "Enabled") and (wapus:GetValue("Silent Aim", "Hit Chance") >= chanceOne) then
-                local target, entry, part = getClosest(silentaimfov.Position, wapus:GetValue("Silent Aim", "Use FOV") and wapus:GetValue("Silent Aim", "FOV Radius"), wapus:GetValue("Silent Aim", "Use Dead FOV") and wapus:GetValue("Silent Aim", "Dead FOV Radius"), wapus:GetValue("Silent Aim", "Visible Check"), (wapus:GetValue("Silent Aim", "Head Shot Chance") >= chanceTwo) and "Head" or "Torso")
+                local target, entry, part = getClosest(silentaimfov.Position, wapus:GetValue("Silent Aim", "Use FOV") and silentaimfov.Radius, wapus:GetValue("Silent Aim", "Use Dead FOV") and silentaimdeadfov.Radius, wapus:GetValue("Silent Aim", "Visible Check"), (wapus:GetValue("Silent Aim", "Head Shot Chance") >= chanceTwo) and "Head" or "Torso")
                 
                 if target then
                     local player = entry._player
@@ -3773,6 +3747,25 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
 
         return applyImpulse(...)
+    end
+
+    local reload = firearmObject.reload
+    function firearmObject:reload()
+        if wapus:GetValue("Gun Mods", "Instant Reload") and self._spareCount > 0 then
+            if self._spareCount >= self._weaponData.magsize then
+                self._spareCount = self._spareCount - (self._weaponData.magsize - self._magCount)
+                self._magCount = self._weaponData.magsize
+            else
+                self._magCount = self._spareCount
+                self._spareCount = 0
+            end
+            
+            send(network, "reload")
+
+            return
+        end
+
+        return reload(self)
     end
 
     local computeWalkSway = firearmObject.computeWalkSway
@@ -4149,7 +4142,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         startTime = os.clock()
     end
 
-    callbackList["Anti Aim%%Enabled"] = function(state)
+    callbackList["Anti Aim%%Enabled (May Cause Despawning)"] = function(state)
         callbackList["Anti Aim%%Spin Bot"]()
 
         if charInterface.isAlive() then
@@ -4800,7 +4793,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     
     espInterface.getCharacter = LPH_NO_VIRTUALIZE(function(player)
         local playerReplicationObject = replicationInterface.getEntry(player)
-        local thirdPerson = playerReplicationObject:isAlive() and playerReplicationObject:getThirdPersonObject()
+        local thirdPerson = playerReplicationObject:isReady() and playerReplicationObject._smoothReplication._prevFrameTime and playerReplicationObject and playerReplicationObject:getThirdPersonObject()
         return thirdPerson and thirdPerson:getCharacterModel(), thirdPerson and thirdPerson:getRootPart()
     end)
     
@@ -5193,19 +5186,14 @@ LPH_JIT_MAX(function() -- Main Cheat
             chanceTwo = math.random(1, 100)
             lastRandom = clockTime
         end
-
-        if controller then
-            local parts = {}
-            local transparency = (hidden or weapon._blackScoped or ((wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character")) and (wapus:GetValue("Third Person", "Show Character While Aiming") or not aiming))) and 1 or 0
-
-            for _, part in next, controlledParts do
-                if part.Parent ~= nil then
-                    part.Transparency = transparency
-                    table.insert(parts, part)
-                end
+        
+        if controller and weapon then
+            local isHidden = (hidden or weapon._blackScoped or ((wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character")) and (wapus:GetValue("Third Person", "Show Character While Aiming") or not aiming)))
+            if isHidden then
+                weapon:hideModel()
+            else
+                weapon:showModel()
             end
-
-            controlledParts = parts
         end
 
         if customModel and rootPart then
@@ -5258,13 +5246,13 @@ LPH_JIT_MAX(function() -- Main Cheat
                             end)
                         end
 
-                        if wapus:GetValue("Anti Aim", "Enabled") and wapus:GetValue("Anti Aim", "Force Stance") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") and currentObj then
+                        if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Anti Aim", "Force Stance") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") and currentObj then
                             currentObj:setStance(string.lower(wapus:GetValue("Anti Aim", "Set Stance")))
                         end
                     end
                     
                     local angles = cameraInterface:getActiveCamera():getAngles()
-                    if wapus:GetValue("Anti Aim", "Enabled") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") then
+                    if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") then
                         angles = applyAAAngles(angles)
                     end
                     
@@ -5306,7 +5294,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
-        if wapus:GetValue("Anti Aim", "Enabled") and wapus:GetValue("Anti Aim", "Jitter") and rootPart and (clockTime - lastJitter) > (1 / wapus:GetValue("Anti Aim", "Jitter Speed") / 2) then
+        if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Anti Aim", "Jitter") and rootPart and (clockTime - lastJitter) > (1 / wapus:GetValue("Anti Aim", "Jitter Speed") / 2) then
             lastJitterStarted = not lastJitterStarted
             send(network, "aim", lastJitterStarted)
             lastJitter = clockTime
@@ -5526,7 +5514,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     
                             local fireDelay = 60 / (data.variablefirerate and data.firerate[weapon._firemodeIndex] or data.firerate)
     
-                            if wapus:GetValue("Rage Bot", "Firerate") then
+                            if wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
                                 if (newSpawnCache.currentAddition + fireDelay) <= timeRange then
                                     newSpawnCache.currentAddition += fireDelay
                                     newSpawnCache.lastOffsetUpdate = network.getTime()
@@ -5554,7 +5542,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
         aimbotting = false
         if wapus:GetValue("Aim Bot", "Enabled") and aiming then
-            local target, entry, part = getClosest(aimbotfov.Position, wapus:GetValue("Aim Bot", "Use FOV") and wapus:GetValue("Aim Bot", "FOV Radius"), wapus:GetValue("Aim Bot", "Use Dead FOV") and wapus:GetValue("Aim Bot", "Dead FOV Radius"), wapus:GetValue("Aim Bot", "Visible Check"), wapus:GetValue("Aim Bot", "Target Part"))
+            local target, entry, part = getClosest(aimbotfov.Position, wapus:GetValue("Aim Bot", "Use FOV") and aimbotfov.Radius, wapus:GetValue("Aim Bot", "Use Dead FOV") and aimbotdeadfov.Radius, wapus:GetValue("Aim Bot", "Visible Check"), wapus:GetValue("Aim Bot", "Target Part"))
 
             if target and movementCache.position[entry._player][15] then
                 aimbotting = true
@@ -5682,7 +5670,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
                 ["cum"] = "https://www.myinstants.com/media/sounds/splooge-sound.mp3",
                 ["moan"] = "https://www.myinstants.com/media/sounds/anime-ahh.mp3",
                 ["goofy"] = "https://www.myinstants.com/media/sounds/goofy-ahh-sounds.mp3"
-            } do
+            } do -- why so mean
                 writefile(folderName .. "/sounds/" .. name .. ".mp3", game:HttpGet(link, true))
                 task.wait(1) -- some executors limit httpget
             end
@@ -5734,7 +5722,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
     if not isfile(folderName .. "/chat spam lists/default.txt") then
         writefile(folderName .. "/chat spam lists/default.txt", httpService:JSONEncode({
-            "but doctor prognosis: OWNED",
+            "but doctor prognosis: OWNED", -- legacy a pro for this list
             "but doctor results: 🔥",
             "looks like you need to talk to your doctor",
             "speak to your doctor about this one",
@@ -5759,7 +5747,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local title
     if isfile(folderName .. "/theme.json") then
         local userThemeData = httpService:JSONDecode(readfile(folderName .. "/theme.json"))
-        title = userThemeData.Title
+        title = (userThemeData.Title == "Wapus" and "Wapus.Shop") or userThemeData.Title
         wapus.theme = {
             accent = Color3.fromRGB(table.unpack(userThemeData["Accent Color"])),
             text = Color3.fromRGB(table.unpack(userThemeData["Text Color"])),
@@ -5926,7 +5914,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     
     hitboxes:AddToggle("Enabled", false, getCallback("Hit Boxes%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Color", Color3.new(0.1, 0.1, 1), getCallback("Hit Boxes%%Color"))
     hitboxes:AddDropdown("Hit Part", "Head", {"Head", "Torso"}, getCallback("Hit Boxes%%Hit Part"))
-    hitboxes:AddSlider("Size", 12, 1, 12, 1, " Studs", getCallback("Hit Boxes%%Size"))
+    hitboxes:AddSlider("Size", 20, 1, 20, 1, " Studs", getCallback("Hit Boxes%%Size"))
     hitboxes:AddSlider("Transparency", 50, 0, 100, 1, "%", getCallback("Hit Boxes%%Transparency"))
     hitboxes:AddDropdown("Material", "SmoothPlastic", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Hit Boxes%%Material"))
     
@@ -5945,6 +5933,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     gunmods:AddToggle("No Camera Sway", false, getCallback("Gun Mods%%No Camera Sway"))
     gunmods:AddToggle("No Walk Sway", false, getCallback("Gun Mods%%No Walk Sway"))
     gunmods:AddToggle("No Gun Sway", false, getCallback("Gun Mods%%No Gun Sway"))
+    gunmods:AddToggle("Instant Reload", false, getCallback("Gun Mods%%Instant Reload"))
 
     ragebot:AddToggle("Enabled", false, getCallback("Rage Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     ragebot:AddToggle("Shoot Effects", false, getCallback("Rage Bot%%Shoot Effects"))
@@ -5952,7 +5941,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     ragebot:AddSlider("Fire Position Offset", 9, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
     ragebot:AddToggle("Hit Position Scanning", false, getCallback("Rage Bot%%Hit Position Scanning"))
     ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
-    ragebot:AddToggle("Firerate", false, getCallback("Rage Bot%%Firerate"))
+    ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
     ragebot:AddToggle("Only Shoot Target Status", false, getCallback("Rage Bot%%Only Shoot Target Status")):AddKeyBind(nil, "Target Key Bind")
     ragebot:AddToggle("Whitelist Friendly Status", true, getCallback("Rage Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
 
@@ -5961,7 +5950,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     knifebot:AddToggle("Only Kill Target Status", false, getCallback("Knife Bot%%Only Kill Target Status")):AddKeyBind(nil, "Terget Key Bind")
     knifebot:AddToggle("Whitelist Friendly Status", true, getCallback("Knife Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
 
-    antiaim:AddToggle("Enabled", false, getCallback("Anti Aim%%Enabled"))-- :AddKeyBind(nil, "Key Bind") broken
+    antiaim:AddToggle("Enabled (May Cause Despawning)", false, getCallback("Anti Aim%%Enabled (May Cause Despawning)"))-- :AddKeyBind(nil, "Key Bind") broken
     antiaim:AddToggle("Yaw", false, getCallback("Anti Aim%%Yaw"))
     antiaim:AddSlider("Yaw Amount", 180, 0, 360, 1, " Degrees", getCallback("Anti Aim%%Yaw Amount"))
     antiaim:AddDropdown("Yaw Mode", "Relative", {"Relative", "Absolute"}, getCallback("Anti Aim%%Yaw Mode"))
