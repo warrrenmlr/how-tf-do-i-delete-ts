@@ -10,7 +10,7 @@
     [ UI Library ] - [ Line 1117 ]
     [ Cham Library ] - [ Line 2710 ]
     [ Main Cheat ] - [ Line 2766 ]
-    [ Make UI ] - [ Line 5631 ]
+    [ Make UI ] - [ Line 5751 ]
 
     ~ Credits ~
 
@@ -72,7 +72,7 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
     game:GetService("RunService"):Set3dRenderingEnabled(false) -- increase performance              bruh why this doesnt work on nihon idk if it works on other executors
 
     local function isKickInProgress()
-        return debug.getupvalue(votekick.vote, 1)
+        return debug.getupvalue(votekick.vote, 1) -- fuck you guy
     end
 
     local console = clientEvents.console
@@ -2767,26 +2767,20 @@ LPH_JIT_MAX(function() -- Main Cheat
     local modules, require_module
 
     for _, func in getgc(false) do
-        if type(func) == "function" and islclosure(func) and debug.getinfo(func).name == "require" and string.find(debug.getinfo(func).source, "ClientLoader") then
+        if type(func) == "function" and getfenv(func).script and getfenv(func).script.Name == "ClientLoader" then
             require_module = func
-            modules = {}
-
-            for moduleName, moduleCache in debug.getupvalue(func, 1)._cache do
-                modules[moduleName] = moduleCache.module
-            end
-
+            modules = setmetatable({}, {__index = function(self, index)
+                return require_module(index)
+            end})
             break
         end
-    end
-
-    if getrenv and getrenv() ~= nil and getrenv().shared then -- this might do something or it might not idrk
-        getrenv().shared.require = require_module
     end
 
     --now aint this sexy
     local effects = modules.Effects
     local vector = modules.VectorLib
     local physics = modules.PhysicsLib
+    local raycastLib = modules.Raycast
     local cframeLib = modules.CFrameLib
     local recoil = modules.RecoilSprings
     local network = modules.NetworkClient
@@ -2818,12 +2812,17 @@ LPH_JIT_MAX(function() -- Main Cheat
     local replicationInterface = modules.ReplicationInterface
     local crosshairsInterface = modules.HudCrosshairsInterface
 
-    local networkConnections = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
-
-    if getfenv then
-        getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
-        getfenv(cameraInterface.setCameraType).warn = function() end
+    --local networkConnections = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
+    local networkConnections
+    for i, v in getgc(true) do
+        if type(v) == "table" and rawget(v, "died") and rawget(v, "smallaward") then
+            networkConnections = v
+            break
+        end
     end
+
+    getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
+    getfenv(cameraInterface.setCameraType).warn = function() end
     
     local players = game:GetService("Players")
     local lighting = game:GetService("Lighting")
@@ -2834,6 +2833,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     local userInputService = game:GetService("UserInputService")
     local camera = workspace.CurrentCamera
     local ignore = workspace.Ignore
+    local misc = ignore.Misc
     local localplayer = players.LocalPlayer
     local currentObj, started, fakeRepObject, aimbotting
     local movementCache = {time = {}, position = {}}
@@ -2970,7 +2970,74 @@ LPH_JIT_MAX(function() -- Main Cheat
         return f * t / 2 + ld / t, t
     end
 
-    local solve = debug.getupvalue(physics.timehit, 2)
+    --local solve = debug.getupvalue(physics.timehit, 2)
+    local function solve(v44, v45, v46, v47, v48) -- i did not write this
+        if not v44 then
+            return
+        elseif v44 > -1.0E-10 and v44 < 1.0E-10 then
+            return solve(v45, v46, v47, v48)
+        else
+            if v48 then
+                local v49 = -v45 / (4 * v44)
+                local v50 = (v46 + v49 * (3 * v45 + 6 * v44 * v49)) / v44
+                local v51 = (v47 + v49 * (2 * v46 + v49 * (3 * v45 + 4 * v44 * v49))) / v44
+                local v52 = (v48 + v49 * (v47 + v49 * (v46 + v49 * (v45 + v44 * v49)))) / v44
+                if v51 > -1.0E-10 and v51 < 1.0E-10 then
+                    local v53, v54 = solve(1, v50, v52)
+                    if not v54 or v54 < 0 then
+                        return
+                    else
+                        local v55 = math.sqrt(v53)
+                        local v56 = math.sqrt(v54)
+                        return v49 - v56, v49 - v55, v49 + v55, v49 + v56
+                    end
+                else
+                    local v57, _, v59 = solve(1, 2 * v50, v50 * v50 - 4 * v52, -v51 * v51)
+                    local v60 = v59 or v57
+                    local v61 = math.sqrt(v60)
+                    local v62, v63 = solve(1, v61, (v60 + v50 - v51 / v61) / 2)
+                    local v64, v65 = solve(1, -v61, (v60 + v50 + v51 / v61) / 2)
+                    if v62 and v64 then
+                        return v49 + v62, v49 + v63, v49 + v64, v49 + v65
+                    elseif v62 then
+                        return v49 + v62, v49 + v63
+                    elseif v64 then
+                        return v49 + v64, v49 + v65
+                    end
+                end
+            elseif v47 then
+                local v66 = -v45 / (3 * v44);
+                local v67 = -(v46 + v66 * (2 * v45 + 3 * v44 * v66)) / (3 * v44)
+                local v68 = -(v47 + v66 * (v46 + v66 * (v45 + v44 * v66))) / (2 * v44)
+                local v69 = v68 * v68 - v67 * v67 * v67
+                local v70 = math.sqrt((math.abs(v69)))
+                if v69 > 0 then
+                    local v71 = v68 + v70
+                    local v72 = v68 - v70
+                    v71 = v71 < 0 and -(-v71) ^ 0.3333333333333333 or v71 ^ 0.3333333333333333
+                    local v73 = v72 < 0 and -(-v72) ^ 0.3333333333333333 or v72 ^ 0.3333333333333333
+                    return v66 + v71 + v73
+                else
+                    local v74 = math.atan2(v70, v68) / 3
+                    local v75 = 2 * math.sqrt(v67)
+                    return v66 - v75 * math.sin(v74 + 0.5235987755982988), v66 + v75 * math.sin(v74 - 0.5235987755982988), v66 + v75 * math.cos(v74)
+                end;
+            elseif v46 then
+                local v76 = -v45 / (2 * v44)
+                local v77 = v76 * v76 - v46 / v44
+                if v77 < 0 then
+                    return
+                else
+                    local v78 = math.sqrt(v77)
+                    return v76 - v78, v76 + v78
+                end
+            elseif v45 then
+                return -v45 / v44
+            end
+            return
+        end
+    end
+    
     local function complexTrajectory(o, a, t, s, e) -- thank you mickey
         local ld = t - o
         a = -a
@@ -3072,9 +3139,28 @@ LPH_JIT_MAX(function() -- Main Cheat
         return {origin}
     end
 
-    local bulletIgnoreList = debug.getupvalue(bulletcheck, 4)
-    table.insert(bulletIgnoreList, hitboxObjects) -- only adding this fix cuz sirmeme ran into this bug on stream lmao
-    table.insert(bulletIgnoreList, backtrackObjects) -- robloxscripts.com WWWWWW
+    --local bulletIgnoreList = debug.getupvalue(bulletcheck, 4)--cant fucking use this method anymore cuz im getting rid of getupvalue
+    --table.insert(bulletIgnoreList, hitboxObjects) -- only adding this fix cuz sirmeme ran into this bug on stream lmao
+    --table.insert(bulletIgnoreList, backtrackObjects) -- robloxscripts.com WWWWWW
+
+    local raycastFunc = raycastLib.raycast
+    function raycastLib.raycast(origin, direction, ignoreList, ignoreFunc, a5) -- idk wtf this last parameter is maybe resetIgnoreCache?
+        if getfenv(ignoreFunc).script == getfenv(bulletcheck).script then
+            ignoreFunc = function(part)
+                if not part.CanCollide then
+                    return true
+                elseif part.Transparency == 1 then
+                    return true
+                elseif part:IsDescendantOf(hitboxObjects) or part:IsDescendantOf(backtrackObjects) then
+                    return true
+                else
+                    return
+                end
+            end
+        end
+
+        return raycastFunc(origin, direction, ignoreList, ignoreFunc, a5)
+    end
     
     local raycastStep = 1 / 30 -- 60 for more accuracy
     local function scanPositions(origin, target, accel, speed, penetration)
@@ -3164,6 +3250,8 @@ LPH_JIT_MAX(function() -- Main Cheat
         return Vector3.new(x, y, z)
     end
 
+    local ticket = 0
+    local ticketAddition = 0
     local flyUpdateDelay = 1 / 16 -- used in fly and firerate bypass
     local timeUpdates = { -- used in firerate bypass
         equip = 2,
@@ -3373,6 +3461,12 @@ LPH_JIT_MAX(function() -- Main Cheat
         elseif name == "newbullets" then
             local uniqueId, bulletData, time = ...
 
+            ticket = ticket + #bulletData.bullets
+
+            for _, bullet in bulletData.bullets do
+                bullet[2] = bullet[2] + ticketAddition
+            end
+
             if wapus:GetValue("Rage Bot", "Enabled") then
                 return
             end
@@ -3392,18 +3486,19 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             return send(self, name, uniqueId, bulletData, time + newSpawnCache.latency + newSpawnCache.currentAddition)
         elseif name == "bullethit" then
-            local uniqueId, player, position, partName, ticket, time = ...
+            local uniqueId, player, position, partName, theTicket, time = ...
+            theTicket = theTicket + ticketAddition
 
             if wapus:GetValue("Rage Bot", "Enabled") then
                 return
             end
 
-            if ticketCache[ticket] then
+            if ticketCache[theTicket] then
                 return
             end
 
-            ticketCache[ticket] = true
-            return send(self, name, uniqueId, player, position, partName, ticket, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+            ticketCache[theTicket] = true
+            return send(self, name, uniqueId, player, position, partName, theTicket, time + newSpawnCache.latency + newSpawnCache.currentAddition)
         elseif name == "falldamage" and wapus:GetValue("Movement", "No Fall Damage") then
             return
         elseif name == "stance" then
@@ -3679,7 +3774,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                     if not ticketCache[extra.bulletTicket] then
                         if wapus:GetValue("Hit Boxes", "Enabled") and part:IsDescendantOf(hitboxObjects) then
                             ticketCache[extra.bulletTicket] = true
-                            send(network, "bullethit", extra.uniqueId, players[part.Name], position, wapus:GetValue("Hit Boxes", "Hit Part"), extra.bulletTicket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
+                            send(network, "bullethit", extra.uniqueId, players[part.Name], position, wapus:GetValue("Hit Boxes", "Hit Part"), extra.bulletTicket + ticketAddition, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
                         elseif wapus:GetValue("Backtracking", "Enabled") and part:IsDescendantOf(backtrackObjects) then
                             local model = part
 
@@ -3692,7 +3787,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                             local head = entry._thirdPersonObject and entry._thirdPersonObject._characterModelHash and entry._thirdPersonObject._characterModelHash.Head
 
                             ticketCache[extra.bulletTicket] = true
-                            send(network, "bullethit", extra.uniqueId, player, position, (part == head) and "Head" or "Torso", extra.bulletTicket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
+                            send(network, "bullethit", extra.uniqueId, player, position, (part == head) and "Head" or "Torso", extra.bulletTicket + ticketAddition, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
                         end
                     end
 
@@ -3788,7 +3883,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     end
 
     local fromAxisAngle = cframeLib.fromAxisAngle
-    function cframeLib.fromAxisAngle(x, y, z)
+    function cframeLib.fromAxisAngle(x, y, z) -- luh freak
         if aimbotting then -- or wapus:GetValue("Gun Mods", "No Camera Sway") then
             local controller = weaponInterface.getActiveWeaponController()
             local weapon = controller and controller:getActiveWeapon()
@@ -4039,13 +4134,32 @@ LPH_JIT_MAX(function() -- Main Cheat
         return playSound(soundName, ...)
     end
 
-    local oldGlassSounds = debug.getupvalue(effects.breakwindow, 3)
-    callbackList["Sounds%%Glass Breaking Sound"] = function(state)
-        debug.setupvalue(effects.breakwindow, 3, (not state or state == "None") and oldGlassSounds or {
-            customAudios[state],
-            customAudios[state],
-            customAudios[state]
-        })
+    --local oldGlassSounds = debug.getupvalue(effects.breakwindow, 3) -- i dont know how the fuck im gonna find a new method for this one
+    --callbackList["Sounds%%Glass Breaking Sound"] = function(state)
+    --    debug.setupvalue(effects.breakwindow, 3, (not state or state == "None") and oldGlassSounds or {
+    --        customAudios[state],
+    --        customAudios[state],
+    --        customAudios[state]
+    --    })
+    --end
+
+    local breakwindow = effects.breakwindow
+    function effects.breakwindow(part, receiveWindow, netTime)
+        if part.Name ~= "Window" then
+            return
+        elseif wapus:GetValue("Sounds", "Glass Breaking Sound") ~= "None" then
+            misc.ChildAdded:Connect(function(child)
+                if child.ClassName == "Part" and child.CFrame == part.CFrame then
+                    child.ChildAdded:Connect(function(sound)
+                        if sound.ClassName == "Sound" then
+                            sound.SoundId = customAudios[wapus:GetValue("Sounds", "Glass Breaking Sound")]
+                        end
+                    end)
+                end
+            end)
+        end
+
+        return breakwindow(part, receiveWindow, netTime)
     end
     
     local setBaseWalkSpeed = charObject.setBaseWalkSpeed
@@ -4110,7 +4224,8 @@ LPH_JIT_MAX(function() -- Main Cheat
         unlockKnives = true
     end
 
-    local camoDatabase = debug.getupvalue(skinCaseUtils.getSkinDataset, 1)
+    --local camoDatabase = debug.getupvalue(skinCaseUtils.getSkinDataset, 1)
+    local camoDatabase = require(game:GetService("ReplicatedStorage").Content.ProductionContent.CamoDatabase)
     callbackList["Tweaks%%Unlock All Camos"] = function()
         unlockCamos = true
 
@@ -5441,6 +5556,10 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
 
         if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and newSpawnCache.hasPinged and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then
+            --[[if weapon and weapon._weaponData then
+                weapon:shoot(true)
+            end]]
+            
             if weapon and weapon._weaponData and newSpawnCache.lastUpdate and not teleporting then
                 local origin = newSpawnCache.lastUpdate
                 local closestPlayers = getClosestPlayers(origin, false, wapus:GetValue("Rage Bot", "Only Shoot Target Status"), wapus:GetValue("Rage Bot", "Whitelist Friendly Status"))
@@ -5474,17 +5593,18 @@ LPH_JIT_MAX(function() -- Main Cheat
                             }
     
                             for _ = 1, (data.pelletcount or 1) do
-                                local ticket = debug.getupvalue(firearmObject.fireRound, 11) + 1
-                                table.insert(bullets, {velocity.Unit, ticket})
-                                debug.setupvalue(firearmObject.fireRound, 11, ticket)
+                                --local ticket = debug.getupvalue(firearmObject.fireRound, 11) + 1
+                                table.insert(bullets, {velocity.Unit, ticket + ticketAddition})
+                                --debug.setupvalue(firearmObject.fireRound, 11, ticket)
+                                ticketAddition = ticketAddition + 1
                             end
     
                             send(network, "newbullets", weapon.uniqueId, bulletData, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
     
                             for bulletIndex = 1, #bullets do
-                                local ticket = bullets[bulletIndex][2]
-                                send(network, "bullethit", weapon.uniqueId, entry._player, newTarget, "Head", ticket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
-                                ticketCache[ticket] = true
+                                local theTicket = bullets[bulletIndex][2]
+                                send(network, "bullethit", weapon.uniqueId, entry._player, newTarget, "Head", theTicket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
+                                --ticketCache[ticket] = true
                             end
 
                             if wapus:GetValue("Rage Bot", "Shoot Effects") and weapon._barrelPart then
@@ -5938,7 +6058,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     ragebot:AddToggle("Enabled", false, getCallback("Rage Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     ragebot:AddToggle("Shoot Effects", false, getCallback("Rage Bot%%Shoot Effects"))
     ragebot:AddToggle("Fire Position Scanning", false, getCallback("Rage Bot%%Fire Position Scanning"))
-    ragebot:AddSlider("Fire Position Offset", 9, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
+    ragebot:AddSlider("Fire Position Offset", 9, 1, 15, 0.5, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
     ragebot:AddToggle("Hit Position Scanning", false, getCallback("Rage Bot%%Hit Position Scanning"))
     ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
     ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
