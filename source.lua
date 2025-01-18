@@ -10,7 +10,7 @@
     [ UI Library ] - [ Line 1117 ]
     [ Cham Library ] - [ Line 2710 ]
     [ Main Cheat ] - [ Line 2766 ]
-    [ Make UI ] - [ Line 5751 ]
+    [ Make UI ] - [ Line 5759 ]
 
     ~ Credits ~
 
@@ -4225,7 +4225,15 @@ LPH_JIT_MAX(function() -- Main Cheat
     end
 
     --local camoDatabase = debug.getupvalue(skinCaseUtils.getSkinDataset, 1)
-    local camoDatabase = require(game:GetService("ReplicatedStorage").Content.ProductionContent.CamoDatabase)
+    --local camoDatabase = require(game:GetService("ReplicatedStorage").Content.ProductionContent.CamoDatabase)
+    local camoDatabase
+    for i, v in getgc(true) do
+        if type(v) == "table" and rawget(v, "Mentha Spicata") and rawget(v, "Dove blue") then
+            camoDatabase = v
+            break
+        end
+    end
+
     callbackList["Tweaks%%Unlock All Camos"] = function()
         unlockCamos = true
 
