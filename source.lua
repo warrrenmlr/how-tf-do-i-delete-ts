@@ -10,7 +10,7 @@
     [ UI Library ] - [ Line 1117 ]
     [ Cham Library ] - [ Line 2710 ]
     [ Main Cheat ] - [ Line 2766 ]
-    [ Make UI ] - [ Line 5759 ]
+    [ Make UI ] - [ Line 5760 ]
 
     ~ Credits ~
 
@@ -2764,16 +2764,17 @@ end
 end)()
 
 LPH_JIT_MAX(function() -- Main Cheat
-    local modules, require_module
-
-    for _, func in getgc(false) do
-        if type(func) == "function" and getfenv(func).script and getfenv(func).script.Name == "ClientLoader" then
-            require_module = func
-            modules = setmetatable({}, {__index = function(self, index)
-                return require_module(index)
-            end})
+    local moduleCache
+    for i, v in getgc(true) do
+        if type(v) == "table" and rawget(v, "ScreenCull") and rawget(v, "NetworkClient") then
+            moduleCache = v
             break
         end
+    end
+
+    local modules = {}
+    for name, data in moduleCache do
+        modules[name] = data.module
     end
 
     --now aint this sexy
