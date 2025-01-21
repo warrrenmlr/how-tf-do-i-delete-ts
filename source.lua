@@ -3544,7 +3544,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             local add = newSpawnCache.latency + newSpawnCache.currentAddition
             return send(self, name, a, b + add, c + add)
-        elseif name == "changeCamo" and unlockCamos then -- ok so why is unlock all camos server side?
+        elseif name == "changeCamo" and unlockCamos then -- ok so why is unlock all camos server side? -- ok i tested it for myself and it is NOT server side
             local wepClass, slot, camoName = ...
             return
         elseif name == "changeAttachment" and unlockAttachments then
@@ -3577,7 +3577,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                     end
                 end
             end
-        elseif name == "flaguser" or name == "debug" or name == "logmessage" then
+        elseif name == "flaguser" or name == "debug" or name == "logmessage" then -- undetected p
             return
         end
 
@@ -5564,7 +5564,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
-        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and newSpawnCache.hasPinged and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then
+        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then --  and newSpawnCache.hasPinged
             --[[if weapon and weapon._weaponData then
                 weapon:shoot(true)
             end]]
