@@ -10,7 +10,7 @@
     [ UI Library ] - [ Line 1117 ]
     [ Cham Library ] - [ Line 2710 ]
     [ Main Cheat ] - [ Line 2766 ]
-    [ Make UI ] - [ Line 5759 ]
+    [ Make UI ] - [ Line 5760 ]
 
     ~ Credits ~
 
@@ -2764,16 +2764,17 @@ end
 end)()
 
 LPH_JIT_MAX(function() -- Main Cheat
-    local modules, require_module
-
-    for _, func in getgc(false) do
-        if type(func) == "function" and getfenv(func).script and getfenv(func).script.Name == "ClientLoader" then
-            require_module = func
-            modules = setmetatable({}, {__index = function(self, index)
-                return require_module(index)
-            end})
+    local moduleCache
+    for i, v in getgc(true) do
+        if type(v) == "table" and rawget(v, "ScreenCull") and rawget(v, "NetworkClient") then
+            moduleCache = v
             break
         end
+    end
+
+    local modules = {}
+    for name, data in moduleCache do
+        modules[name] = data.module
     end
 
     --now aint this sexy
@@ -3543,7 +3544,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             local add = newSpawnCache.latency + newSpawnCache.currentAddition
             return send(self, name, a, b + add, c + add)
-        elseif name == "changeCamo" and unlockCamos then -- ok so why is unlock all camos server side?
+        elseif name == "changeCamo" and unlockCamos then -- ok so why is unlock all camos server side? -- ok i tested it for myself and it is NOT server side
             local wepClass, slot, camoName = ...
             return
         elseif name == "changeAttachment" and unlockAttachments then
@@ -3576,7 +3577,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                     end
                 end
             end
-        elseif name == "flaguser" or name == "debug" or name == "logmessage" then
+        elseif name == "flaguser" or name == "debug" or name == "logmessage" then -- undetected p
             return
         end
 
@@ -5563,7 +5564,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
-        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and newSpawnCache.hasPinged and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then
+        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then --  and newSpawnCache.hasPinged
             --[[if weapon and weapon._weaponData then
                 weapon:shoot(true)
             end]]
