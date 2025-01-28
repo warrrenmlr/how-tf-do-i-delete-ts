@@ -2875,7 +2875,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     }))
     
-    local astar = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Sirius/request/library/Pathfinding"))() -- fucking flies so it despawns now. ill make pathfinding that stays on the ground
+    local astar = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/request/library/Pathfinding"))() -- fucking flies so it despawns now. ill make pathfinding that stays on the ground
 
     astar.maxtime = 0.33
     astar.interval = 12  --  8 to 16 is good
@@ -4153,7 +4153,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 if child.ClassName == "Part" and child.CFrame == part.CFrame then
                     child.ChildAdded:Connect(function(sound)
                         if sound.ClassName == "Sound" then
-                            sound.SoundId = customAudios[wapus:GetValue("Sounds", "Glass Breaking Sound")]
+                            sound.SoundId = customAudios[wapus:GetValue("Sounds", "Glass Breaking Sound")] or ""
                         end
                     end)
                 end
@@ -4817,7 +4817,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     end)
     
-    local espInterface = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Sirius/refs/heads/request/library/sense/source.lua"))()
+    local espInterface = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/refs/heads/request/library/sense/source.lua"))()
     espInterface.teamSettings = {
         enemy = {
             enabled = true,
