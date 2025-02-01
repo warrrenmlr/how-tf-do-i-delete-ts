@@ -4,15 +4,23 @@ getgenv().knifeBotSettings = getgenv().knifeBotSettings or {
     targetUsernames = { -- Name not DisplayName
         "",
     },
+	autoSpawn = true,
+	noKillProtection = true,
+	autoVotekickRandom = true,
+	autoHopOnVotekick = true,
+
+	-- prolly dont need to mess with these
     maxTeleportStuds = 9.9, -- maximum studs updates can be from each other
-    pathfindingInterval = 2, -- raycasting interval (smaller is more laggy but better pathfinding, larger is less laggy but worse pathfinding)
+    pathfindingInterval = 3, -- raycasting interval (smaller is more laggy but better pathfinding, larger is less laggy but worse pathfinding)
     stayOnGround = true, -- whether or not pathfinding stays on the ground
-    playerIgnoreDelay = 2, -- how many seconds it should ignore the target for when you get lagged back
-    teleportStability = 15, -- how many updates it should send before stabbing
+    playerIgnoreDelay = 1.5, -- how many seconds it should ignore the target for when you get lagged back
+    teleportStability = 10, -- how many updates it should send before stabbing
 	teleportDelay = 0, -- how many ms to wait between teleports
-    spawnStability = 60, -- how many updates to send when spawning
+    spawnStability = 150, -- how many updates to send when spawning
     performance = true, -- better fps and slightly slower knifebot
-    pathfindingMaxTime = 1--0.0833333, -- how long the pathfinding can freeze the game for
+    pathfindingMaxTime = 1,--0.0833333, -- how long the pathfinding can freeze the game for
+	updateSpeedMultiplier = 1, -- force teleporting to be faster, seems to despawnn sometimes
+	maxKnifeDistance = 20 -- limit how far the player can be from the target when stabbing
 }
 function LPH_NO_VIRTUALIZE(fuction)
     return fuction
@@ -46,9 +54,12 @@ for i, v in getgc(true) do
 	end
 end
 
-local localPlayer = game:GetService("Players").LocalPlayer
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
 local runService = game:GetService("RunService")
 local workspace = game:GetService("Workspace")
+local httpService = game:GetService("HttpService")
+local teleportService = game:GetService("TeleportService")
 --local pathfinding = loadstring(readfile("pathfinding.lua"))()
 local pathfinding = loadstring(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/pathfinding.lua"))() -- i didnt make this
 
@@ -86,83 +97,206 @@ function clientEvents.correctposition(position)
     return correctPosition(position)
 end
 
+local lastDespawn = 0
+local despawn = clientEvents.despawn
+function clientEvents.despawn(data)
+	lastDespawn = os.clock()
+	return despawn(data)
+end
+
+local lastKill = 0
+local killCount = 0
+local hasKilled = false
+local meleeHitConfirm = clientEvents.meleeHitConfirm
+function clientEvents.meleeHitConfirm(...)
+	lastKill = os.clock()
+	killCount += 1
+	task.delay(10, function()
+		killCount -= 1
+	end)
+
+	if not hasKilled and getgenv().knifeBotSettings.autoVotekickRandom and modules.PlayerDataUtils.getPlayerRank(modules.PlayerDataClientInterface.getPlayerData()) >= 25 then
+		task.delay(10, function()
+			local target
+	
+			for _, player in players:GetPlayers() do
+				if player ~= localPlayer then
+					target = player
+				end
+			end
+	
+			if target then
+				modules.NetworkClient:send("modcmd", "/votekick:" .. target.Name .. ":" .. ({"unfair", "hacker", "hacks", "cheats", "wall hacks"})[math.random(1, 5)])
+			end
+		end)
+	end
+
+	hasKilled = true
+	return meleeHitConfirm(...)
+end
+
+local lastSpawn = 0
+runService.Heartbeat:Connect(function()
+	local alive = modules.CharacterInterface.isAlive()
+	local clock = os.clock()
+
+    if getgenv().knifeBotSettings.autoSpawn and not alive and clock - lastDespawn > 3.5 then
+		modules.CharacterInterface.spawn()
+		lastDespawn += 1
+	end
+
+    if getgenv().knifeBotSettings.noKillProtection and alive and clock then
+		if clock - lastSpawn > 11 and killCount == 0 and clock - lastKill > 10 then
+			modules.NetworkClient:send("forcereset")
+		end
+	end
+end)
+
+local function hopServers(min)
+	local cachedServers = httpService:JSONDecode(readfile("votekick cache/" .. localPlayer.Name .. ".json"))
+	local minimum = min or 20
+
+	local cursor
+	while true do
+		local serverData = httpService:JSONDecode(request({Url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100" .. (cursor and "&cursor=" .. cursor or ""), Method = "GET"}).Body).data
+		
+		for _, server in serverData do
+			if type(server) == "table" and server.maxPlayers - 2 > server.playing and server.id ~= game.JobId and server.playing >= minimum and not table.find(cachedServers, server.id) then
+				queue_on_teleport("task.wait(7);" .. game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua"))
+				return teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+			end
+		end
+
+		cursor = server.nextPageCursor
+		task.wait(2)
+	end
+
+	return hopServers(minimum - 1)
+end
+
+if getgenv().knifeBotSettings.autoHopOnVotekick then
+	if not isfolder("votekick cache") then
+		makefolder("votekick cache")
+	end
+
+	local fileName = "votekick cache/" .. localPlayer.Name .. ".json"
+	if not isfile(fileName) then
+		writefile(fileName, httpService:JSONEncode({}))
+	end
+
+	local console = clientEvents.console
+	function clientEvents.console(message)
+		local name = string.split(message, " has been kicked out of the server")[1]
+
+		if name == localPlayer.Name then
+			local oldData = httpService:JSONDecode(readfile(fileName))
+			table.insert(oldData, game.JobId)
+			writefile(fileName, httpService:JSONEncode(oldData))
+			print("votekick detected")
+			hopServers()
+		end
+
+		return console(message)
+	end
+end
+
+--[[print(modules.CharacterInterface.step) what the frick
+local b = os.clock()
+local step = modules.CharacterInterface.step
+function modules.CharacterInterface.step(a)
+	local c = os.clock()
+	print(a)
+	print(c - b)
+	c = b
+	print()
+
+	return step(a)
+end]]
+
 local send = modules.NetworkClient.send
 --function modules.NetworkClient:send(name, ...)
 modules.NetworkClient.send = LPH_NO_VIRTUALIZE(function(self, name, ...)
-    if name == "equip" then
+	if name == "spawn" then
+		lastSpawn = os.clock()
+    elseif name == "equip" then
         local slot, time = ...
         return send(self, name, 3, time)
     elseif name == "newbullets" or name == "bullethit" or name == "falldamage" or name == "flaguser" or name == "debug" or name == "logmessage" then
         return
     elseif name == "repupdate" then
-        local position, angles, time = ...
+		for i = 1, math.ceil(getgenv().knifeBotSettings.updateSpeedMultiplier) do
+			local position, angles, time = ...
 
-        if spawnUpdates < getgenv().knifeBotSettings.spawnStability then
-            spawnUpdates += 1
-            return send(self, name, ...)
-        end
+			if spawnUpdates < getgenv().knifeBotSettings.spawnStability then
+				spawnUpdates += 1
+				return send(self, name, ...)
+			end
 
-        if currentTeleport and not currentTeleport.complete and currentPosition then
-            if currentTeleport.teleported then
-                if not currentTeleport.stability then
-                    currentTeleport.stability = 0
-                else
-                    currentTeleport.stability += 1
+			if currentTeleport and not currentTeleport.complete and currentPosition then
+				if currentTeleport.teleported then
+					if not currentTeleport.stability then
+						currentTeleport.stability = 0
+					else
+						currentTeleport.stability += 1
 
-                    send(self, name, currentPosition, angles, time)
-                    if currentTeleport.stability == getgenv().knifeBotSettings.teleportStability then
-                        currentTeleport.complete = true
-						--currentTeleport.currentTime = nil
-                        --correctPosition(currentPosition)
-                        local rootPart = modules.CharacterInterface.getCharacterObject():getRealRootPart()
-                        rootPart.Position = currentPosition
-                        rootPart.Anchored = true
-                    end
-                end
-                
-                return
-            end
-
-            if currentTeleport.currentTime then
-				if currentTeleport.currentTime == 1 then
-                	currentTeleport.currentTime = nil
-					if currentPosition == nil then
-						print("despawn                             NIGGER")
+						send(self, name, currentPosition, angles, time)
+						if currentTeleport.stability == getgenv().knifeBotSettings.teleportStability then
+							currentTeleport.complete = true
+							--currentTeleport.currentTime = nil
+							--correctPosition(currentPosition)
+							local rootPart = modules.CharacterInterface.getCharacterObject():getRealRootPart()
+							rootPart.Position = currentPosition
+							rootPart.Anchored = true
+						end
 					end
-					--return send(self, name, currentPosition, angles, time)
-				else
-                	currentTeleport.currentTime += 1
+					
+					return
 				end
-            else
-                if typeof(currentTeleport.path[currentTeleport.node]) == "Vector3" then
-					currentPosition = currentTeleport.path[currentTeleport.node]
-                	send(self, name, currentPosition, angles, time)
+
+				if currentTeleport.currentTime then
+					if currentTeleport.currentTime == 1 then
+						currentTeleport.currentTime = nil
+						if currentPosition == nil then
+							print("despawn                             triggered")
+						end
+						--return send(self, name, currentPosition, angles, time)
+					else
+						currentTeleport.currentTime += 1
+					end
 				else
-					print("type mismatch")
-					print(typeof(currentTeleport.path[currentTeleport.node]), currentTeleport.path[currentTeleport.node])
+					if typeof(currentTeleport.path[currentTeleport.node]) == "Vector3" then
+						currentPosition = currentTeleport.path[currentTeleport.node]
+						send(self, name, currentPosition, angles, time)
+					else
+						print("type mismatch")
+						print(typeof(currentTeleport.path[currentTeleport.node]), currentTeleport.path[currentTeleport.node])
+					end
+					
+					repeat currentTeleport.node += 1 until (typeof(currentTeleport.path[currentTeleport.node]) == "Vector3") or (currentTeleport.node > currentTeleport.lastNode)
+					
+					if typeof(currentTeleport.path[currentTeleport.node]) == "Vector3" then
+						currentPosition = currentTeleport.path[currentTeleport.node]
+						send(self, name, currentPosition, angles, time)
+						--send(self, name, currentPosition + Vector3.yAxis * 0.01, angles, time + 0.001)
+					else
+						currentTeleport.teleported = true
+					end
+					currentTeleport.currentTime = 1 -- time
+
+
+					if (currentTeleport.node == currentTeleport.lastNode) or (not currentPosition) then
+						currentTeleport.teleported = true
+					end
 				end
-                
-				repeat currentTeleport.node += 1 until (typeof(currentTeleport.path[currentTeleport.node]) == "Vector3") or (currentTeleport.node > currentTeleport.lastNode)
-                
-				if typeof(currentTeleport.path[currentTeleport.node]) == "Vector3" then
-                    currentPosition = currentTeleport.path[currentTeleport.node]
-                    send(self, name, currentPosition, angles, time)
-                    --send(self, name, currentPosition + Vector3.yAxis * 0.01, angles, time + 0.001)
-                else
-                    currentTeleport.teleported = true
-                end
-                currentTeleport.currentTime = 1 -- time
 
+				return
+			end
 
-                if (currentTeleport.node == currentTeleport.lastNode) or (not currentPosition) then
-                    currentTeleport.teleported = true
-                end
-            end
+			currentPosition = position
+			send(self, name, position, angles, time)
+		end
 
-            return
-        end
-
-        currentPosition = position
+		return
     end
 
     return send(self, name, ...)
@@ -232,7 +366,7 @@ local pathfindingParams = {
     step = getgenv().knifeBotSettings.pathfindingInterval,
     trials = 1/0,
     weighting = 400,
-    mindist = 20,
+    mindist = getgenv().knifeBotSettings.maxKnifeDistance,
     maxtime = getgenv().knifeBotSettings.pathfindingMaxTime,
 }
 --function knifeBotStep()
@@ -251,6 +385,7 @@ local knifeBotStep = LPH_NO_VIRTUALIZE(function()
                     local position = entry._receivedPosition
                     local pathfindFunc = getgenv().knifeBotSettings.stayOnGround and pathfinding.floorAStar or pathfinding.vadAStar
 					local start = currentPosition
+					pathfindingParams.maxtime = 0.25 + math.random() * (getgenv().knifeBotSettings.pathfindingMaxTime - 0.25) -- pro
                     local result, data = pathfindFunc({
                         start = start,
                         goal = position,
@@ -295,7 +430,7 @@ local knifeBotStep = LPH_NO_VIRTUALIZE(function()
             if currentTeleport then
                 ignorePlayer(targetEntry._player)
 
-                for _ = 1, 3 do
+                for _ = 1, 2 do
 					task.wait(0.05)
 
 					if targetEntry:isAlive() and targetEntry._receivedPosition then
