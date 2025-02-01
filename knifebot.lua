@@ -8,6 +8,8 @@ getgenv().knifeBotSettings = getgenv().knifeBotSettings or {
 	noKillProtection = true,
 	autoVotekickRandom = true,
 	autoHopOnVotekick = true,
+	serverHopAfterTime = 10, -- minutes, false to disable
+	disableRendering = false,
 
 	-- prolly dont need to mess with these
     maxTeleportStuds = 9.9, -- maximum studs updates can be from each other
@@ -179,16 +181,26 @@ local function hopServers(min)
 	return hopServers(minimum - 1)
 end
 
+if not isfolder("votekick cache") then
+	makefolder("votekick cache")
+end
+
+local fileName = "votekick cache/" .. localPlayer.Name .. ".json"
+if not isfile(fileName) then
+	writefile(fileName, httpService:JSONEncode({}))
+end
+
+if getgenv().knifeBotSettings.serverHopAfterTime then
+	task.spawn(function()
+		task.wait(getgenv().knifeBotSettings.serverHopAfterTime * 60)
+		local oldData = httpService:JSONDecode(readfile(fileName))
+		table.insert(oldData, game.JobId)
+		writefile(fileName, httpService:JSONEncode(oldData))
+		hopServers()
+	end)
+end
+
 if getgenv().knifeBotSettings.autoHopOnVotekick then
-	if not isfolder("votekick cache") then
-		makefolder("votekick cache")
-	end
-
-	local fileName = "votekick cache/" .. localPlayer.Name .. ".json"
-	if not isfile(fileName) then
-		writefile(fileName, httpService:JSONEncode({}))
-	end
-
 	local console = clientEvents.console
 	function clientEvents.console(message)
 		local name = string.split(message, " has been kicked out of the server")[1]
@@ -203,6 +215,10 @@ if getgenv().knifeBotSettings.autoHopOnVotekick then
 
 		return console(message)
 	end
+end
+
+if getgenv().knifeBotSettings.disableRendering then
+	runService:Set3dRenderingEnabled(false)
 end
 
 --[[print(modules.CharacterInterface.step) what the frick
@@ -472,13 +488,13 @@ getgenv().unload = function()
 end
 
 task.spawn(function()
-while true do -- pro
-    knifeBotStep()
+	while true do -- pro
+		knifeBotStep()
 
-	if stop then
-		break
+		if stop then
+			break
+		end
 	end
-end
 end)
 ]=]
 
