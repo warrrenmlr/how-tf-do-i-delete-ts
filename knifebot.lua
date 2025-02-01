@@ -168,7 +168,12 @@ local function hopServers(min)
 		end
 
 		cursor = server.nextPageCursor
-		task.wait(2)
+		
+		if not cursor then
+			break
+		else
+			task.wait(2)
+		end
 	end
 
 	return hopServers(minimum - 1)
