@@ -162,7 +162,7 @@ local function hopServers(min)
 		
 		for _, server in serverData do
 			if type(server) == "table" and server.maxPlayers - 2 > server.playing and server.id ~= game.JobId and server.playing >= minimum and not table.find(cachedServers, server.id) then
-				queue_on_teleport("task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body
+				queue_on_teleport("task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
 				return teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
 			end
 		end
