@@ -232,7 +232,7 @@ local pathfindingParams = {
     step = getgenv().knifeBotSettings.pathfindingInterval,
     trials = 1/0,
     weighting = 400,
-    mindist = 9.9,
+    mindist = 20,
     maxtime = getgenv().knifeBotSettings.pathfindingMaxTime,
 }
 --function knifeBotStep()
