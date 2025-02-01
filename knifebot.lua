@@ -1,4 +1,4 @@
-local source = [=[
+local source = [==[
 getgenv().knifeBotSettings = getgenv().knifeBotSettings or {
     onlyKillTargetUsernames = false,
     targetUsernames = { -- Name not DisplayName
@@ -164,7 +164,7 @@ local function hopServers(min)
 		
 		for _, server in serverData do
 			if type(server) == "table" and server.maxPlayers - 2 > server.playing and server.id ~= game.JobId and server.playing >= minimum and not table.find(cachedServers, server.id) then
-				queue_on_teleport("task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
+				queue_on_teleport("getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);" .. "task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
 				return teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
 			end
 		end
@@ -496,21 +496,23 @@ task.spawn(function()
 		end
 	end
 end)
-]=]
+]==]
 
 local environment = identifyexecutor and identifyexecutor() or ""
 local settingsFix = ""
+local settingsFixString = ""
 local settings
 
 if getgenv().knifeBotSettings then
     settings = game:GetService("HttpService"):JSONEncode(getgenv().knifeBotSettings)
-    settingsFix = [=[
+    settingsFix = [[
         getgenv().knifeBotSettings = game:GetService("HttpService"):JSONDecode(...);
-    ]=]
+    ]]
+    settingsFixString = "getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);"
 end
 
 if getfflag and string.find(string.lower(tostring(getfflag("DebugRunParallelLuaOnMainThread"))), "true") and not executed then
-    loadstring(source)(settings)
+    loadstring(settingsFixString .. source)()
 elseif string.find(environment, "AWP") ~= nil and not executed then
     for _, v in getactors() do
         run_on_actor(v, settingsFix .. [[
@@ -536,7 +538,7 @@ elseif environment == "Nihon" and not executed then
         ]], settings)
     end
 else
-    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/hook.lua") .. "task.wait(5);" .. source)
+    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/hook.lua") .. settingsFixString .. "task.wait(5);" .. source)
     setfflag("DebugRunParallelLuaOnMainThread", "True")
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 end
