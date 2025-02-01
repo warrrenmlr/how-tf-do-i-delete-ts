@@ -501,12 +501,15 @@ end)
 local environment = identifyexecutor and identifyexecutor() or ""
 local settingsFix = ""
 local settingsFixString = ""
-local settings
+local settings = ""
 
 if getgenv().knifeBotSettings then
     settings = game:GetService("HttpService"):JSONEncode(getgenv().knifeBotSettings)
     settingsFix = [[
-        getgenv().knifeBotSettings = game:GetService("HttpService"):JSONDecode(...);
+        local settings = ...;
+        if settings and settings ~= "" then;
+            getgenv().knifeBotSettings = game:GetService("HttpService"):JSONDecode(...);
+        end;
     ]]
     settingsFixString = "getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);"
 end
