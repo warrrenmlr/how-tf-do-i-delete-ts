@@ -154,7 +154,7 @@ end)
 
 local function hopServers(min)
 	local cachedServers = httpService:JSONDecode(readfile("votekick cache/" .. localPlayer.Name .. ".json"))
-	local minimum = min or 20
+	local minimum = min or 25
 
 	local cursor
 	while true do
