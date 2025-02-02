@@ -511,7 +511,7 @@ if getgenv().knifeBotSettings then
             getgenv().knifeBotSettings = game:GetService("HttpService"):JSONDecode(...);
         end;
     ]]
-    settingsFixString = "getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);"
+    settingsFixString = "getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. game:GetService('HttpService'):JSONEncode(getgenv().knifeBotSettings) .. "]=]);"
 end
 
 if getfflag and string.find(string.lower(tostring(getfflag("DebugRunParallelLuaOnMainThread"))), "true") and not executed then
