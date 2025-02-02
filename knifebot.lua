@@ -155,6 +155,7 @@ runService.Heartbeat:Connect(function()
 end)
 
 local function hopServers(min)
+	queue_on_teleport("getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);" .. "task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
 	local cachedServers = httpService:JSONDecode(readfile("votekick cache/" .. localPlayer.Name .. ".json"))
 	local minimum = min or 25
 
@@ -164,8 +165,8 @@ local function hopServers(min)
 		
 		for _, server in serverData do
 			if type(server) == "table" and server.maxPlayers - 2 > server.playing and server.id ~= game.JobId and server.playing >= minimum and not table.find(cachedServers, server.id) then
-				queue_on_teleport("getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);" .. "task.wait(7);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
-				return teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+				teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+				task.wait(5)
 			end
 		end
 
