@@ -58,3 +58,5 @@ userInputService.InputBegan:Connect(function(input)
         screenGui.Enabled = not screenGui.Enabled
     end
 end)
+
+screenGui.Enabled = not screenGui.Enabled
