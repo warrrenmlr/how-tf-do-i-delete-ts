@@ -498,6 +498,7 @@ task.spawn(function()
 end)
 ]==]
 
+Instance.new("Folder", workspace.Ignore).Name = "Farming"
 local environment = identifyexecutor and identifyexecutor() or ""
 local settingsFix = ""
 local settingsFixString = ""
