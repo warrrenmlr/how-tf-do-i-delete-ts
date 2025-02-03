@@ -542,4 +542,4 @@ else
     setfflag("DebugRunParallelLuaOnMainThread", "True")
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 end
-getgenv().executed = true
+--getgenv().executed = true
