@@ -165,8 +165,12 @@ local function hopServers(min)
 		
 		for _, server in serverData do
 			if type(server) == "table" and server.maxPlayers - 2 > server.playing and server.id ~= game.JobId and server.playing >= minimum and not table.find(cachedServers, server.id) then
-				teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
-				task.wait(5)
+				for i = 1, 3 do
+					task.spawn(function()
+						teleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+					end)
+					task.wait(5)
+				end
 			end
 		end
 
