@@ -22,7 +22,7 @@ getgenv().knifeBotSettings = getgenv().knifeBotSettings or {
     performance = true, -- better fps and slightly slower knifebot
     pathfindingMaxTime = 1,--0.0833333, -- how long the pathfinding can freeze the game for
 	updateSpeedMultiplier = 1, -- force teleporting to be faster, seems to despawnn sometimes
-	maxKnifeDistance = 20 -- limit how far the player can be from the target when stabbing
+	maxKnifeDistance = 25 -- limit how far the player can be from the target when stabbing
 }
 function LPH_NO_VIRTUALIZE(fuction)
     return fuction
