@@ -1,4 +1,4 @@
-local source = [==[
+local source = [===[
 getgenv().knifeBotSettings = getgenv().knifeBotSettings or {
     onlyKillTargetUsernames = false,
     targetUsernames = { -- Name not DisplayName
@@ -155,7 +155,7 @@ runService.Heartbeat:Connect(function()
 end)
 
 local function hopServers(min)
-	queue_on_teleport("getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode([=[" .. httpService:JSONEncode(getgenv().knifeBotSettings) .. "]=]);" .. "task.wait(10);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
+	queue_on_teleport("getgenv().knifeBotSettings = game:GetService('HttpService'):JSONDecode( [==[ " .. httpService:JSONEncode(getgenv().knifeBotSettings) .. " ]==] );" .. "task.wait(10);" .. request({Url = "https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/knifebot.lua", Method = "GET"}).Body)
 	local cachedServers = httpService:JSONDecode(readfile("votekick cache/" .. localPlayer.Name .. ".json"))
 	local minimum = min or 25
 
@@ -501,7 +501,7 @@ task.spawn(function()
 		end
 	end
 end)
-]==]
+]===]
 
 Instance.new("Folder", workspace.Ignore).Name = "Farming"
 local environment = identifyexecutor and identifyexecutor() or ""
