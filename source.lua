@@ -5314,6 +5314,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         if controller and weapon then
             local isHidden = (hidden or weapon._blackScoped or ((wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character")) and (wapus:GetValue("Third Person", "Show Character While Aiming") or not aiming)))
             if isHidden then
+                weapon._isHidden = false -- shit fix lmao
                 weapon:hideModel()
             else
                 weapon:showModel()
