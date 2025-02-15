@@ -3418,27 +3418,27 @@ LPH_JIT_MAX(function() -- Main Cheat
                 angles2 = angles * 0.99
             end
             
-            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
-                newSpawnCache.lastOffsetUpdate = newSpawnCache.lastOffsetUpdate or time
+            --if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
+            --    newSpawnCache.lastOffsetUpdate = newSpawnCache.lastOffsetUpdate or time
+            --
+            --    if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
+            --        if newSpawnCache.latency > -timeLag then
+            --            newSpawnCache.latency -= (time - newSpawnCache.lastOffsetUpdate) * 0.45
+            --        end
+            --
+            --        if newSpawnCache.latency < -timeLag then
+            --            newSpawnCache.latency = -timeLag
+            --        end
+            --
+            --        timeRange = timeSkip - newSpawnCache.latency
+            --    elseif newSpawnCache.currentAddition > 0 then
+            --        newSpawnCache.currentAddition -= math.min((time - newSpawnCache.lastOffsetUpdate) * 0.45, newSpawnCache.currentAddition)
+            --    end
+            --
+            --    newSpawnCache.lastOffsetUpdate = time
+            --end
 
-                if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
-                    if newSpawnCache.latency > -timeLag then
-                        newSpawnCache.latency -= (time - newSpawnCache.lastOffsetUpdate) * 0.45
-                    end
-
-                    if newSpawnCache.latency < -timeLag then
-                        newSpawnCache.latency = -timeLag
-                    end
-
-                    timeRange = timeSkip - newSpawnCache.latency
-                elseif newSpawnCache.currentAddition > 0 then
-                    newSpawnCache.currentAddition -= math.min((time - newSpawnCache.lastOffsetUpdate) * 0.45, newSpawnCache.currentAddition)
-                end
-
-                newSpawnCache.lastOffsetUpdate = time
-            end
-
-            local fly = wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)"))
+            local fly = false --wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)"))
             if fly and newSpawnCache.lastUpdate then
                 if not newSpawnCache.lastFlyUpdate or ((clockTime - newSpawnCache.lastFlyUpdate) > flyUpdateDelay) then
                     newSpawnCache.lastFlyUpdate = clockTime
@@ -3522,25 +3522,25 @@ LPH_JIT_MAX(function() -- Main Cheat
             local a, b, c = ...
             newSpawnCache.hasPinged = true
             
-            if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then -- idk if this needs to be here i think it helps a little
-                if newSpawnCache.lastUpdate and newSpawnCache.lastOffsetUpdate then
-                    local time = network.getTime()
-                    if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
-                        if newSpawnCache.latency > -timeLag then
-                            newSpawnCache.latency -= (time - newSpawnCache.lastOffsetUpdate) * 0.25
-                        end
-        
-                        if newSpawnCache.latency < -timeLag then
-                            newSpawnCache.latency = -timeLag
-                        end
-        
-                        timeRange = timeSkip - newSpawnCache.latency
-                    elseif newSpawnCache.currentAddition > 0 then
-                        newSpawnCache.currentAddition -= math.min((time - newSpawnCache.lastOffsetUpdate) * 0.25, newSpawnCache.currentAddition)
-                    end
-                    newSpawnCache.lastOffsetUpdate = time
-                end
-            end
+            --if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then -- idk if this needs to be here i think it helps a little
+            --    if newSpawnCache.lastUpdate and newSpawnCache.lastOffsetUpdate then
+            --        local time = network.getTime()
+            --        if timeLag > 0 and newSpawnCache.latency ~= -timeLag then
+            --            if newSpawnCache.latency > -timeLag then
+            --                newSpawnCache.latency -= (time - newSpawnCache.lastOffsetUpdate) * 0.25
+            --            end
+            --
+            --            if newSpawnCache.latency < -timeLag then
+            --                newSpawnCache.latency = -timeLag
+            --            end
+            --
+            --            timeRange = timeSkip - newSpawnCache.latency
+            --        elseif newSpawnCache.currentAddition > 0 then
+            --            newSpawnCache.currentAddition -= math.min((time - newSpawnCache.lastOffsetUpdate) * 0.25, newSpawnCache.currentAddition)
+            --        end
+            --        newSpawnCache.lastOffsetUpdate = time
+            --    end
+            --end
 
             local add = newSpawnCache.latency + newSpawnCache.currentAddition
             return send(self, name, a, b + add, c + add)
@@ -4196,16 +4196,16 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     end
 
-    callbackList["Movement%%Fly"] = function(state)
-        if not state and charInterface.isAlive() then
-            local object = charInterface.getCharacterObject()
-            local rootPart = object and object:getRealRootPart()
-            
-            if rootPart and rootPart.Anchored then
-                rootPart.Anchored = false
-            end
-        end
-    end
+    --callbackList["Movement%%Fly"] = function(state)
+    --    if not state and charInterface.isAlive() then
+    --        local object = charInterface.getCharacterObject()
+    --        local rootPart = object and object:getRealRootPart()
+    --        
+    --        if rootPart and rootPart.Anchored then
+    --            rootPart.Anchored = false
+    --        end
+    --    end
+    --end
 
     callbackList["Tweaks%%Custom Kill Notification"] = function(state)
         hudnotify.typeList.kill[1] = state and wapus:GetValue("Tweaks", "Notification Text") or "Enemy Killed!"
@@ -5463,7 +5463,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
-        if wapus:GetValue("Movement", "Fly") and rootPart then
+        if false then --wapus:GetValue("Movement", "Fly") and rootPart then
             local cframe = camera.CFrame
             local direction = Vector3.zero
             local forward = cframe.LookVector
@@ -5661,14 +5661,14 @@ LPH_JIT_MAX(function() -- Main Cheat
     
                             local fireDelay = 60 / (data.variablefirerate and data.firerate[weapon._firemodeIndex] or data.firerate)
     
-                            if wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
-                                if (newSpawnCache.currentAddition + fireDelay) <= timeRange then
-                                    newSpawnCache.currentAddition += fireDelay
-                                    newSpawnCache.lastOffsetUpdate = network.getTime()
-                                    fireDelay = 0
-                                    newSpawnCache.hasPinged = false
-                                end
-                            end
+                            --if wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
+                            --    if (newSpawnCache.currentAddition + fireDelay) <= timeRange then
+                            --        newSpawnCache.currentAddition += fireDelay
+                            --        newSpawnCache.lastOffsetUpdate = network.getTime()
+                            --        fireDelay = 0
+                            --        newSpawnCache.hasPinged = false
+                            --    end
+                            --end
     
                             nextShot = clockTime + fireDelay
                             weapon._magCount = weapon._magCount - 1
@@ -6088,7 +6088,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     ragebot:AddSlider("Fire Position Offset", 9, 1, 15, 0.5, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
     ragebot:AddToggle("Hit Position Scanning", false, getCallback("Rage Bot%%Hit Position Scanning"))
     ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
-    ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
+    --ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
     ragebot:AddToggle("Only Shoot Target Status", false, getCallback("Rage Bot%%Only Shoot Target Status")):AddKeyBind(nil, "Target Key Bind")
     ragebot:AddToggle("Whitelist Friendly Status", true, getCallback("Rage Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
 
@@ -6228,8 +6228,8 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     movement:AddToggle("No Fall Damage", false, getCallback("Movement%%No Fall Damage"))
     movement:AddToggle("Bunny Hop", false, getCallback("Movement%%Bunny Hop")):AddKeyBind(nil, "BHop Bind")
     movement:AddToggle("Only While Jumping", true, getCallback("Movement%%Only While Jumping"))
-    movement:AddToggle("Fly", false, getCallback("Movement%%Fly")):AddKeyBind(nil, "Fly Bind")
-    movement:AddSlider("Fly Speed", 50, 10, 250, 1, " Studs/Second", getCallback("Movement%%Fly Speed"))
+    --movement:AddToggle("Fly", false, getCallback("Movement%%Fly")):AddKeyBind(nil, "Fly Bind")
+    --movement:AddSlider("Fly Speed", 50, 10, 250, 1, " Studs/Second", getCallback("Movement%%Fly Speed"))
     --movement:AddToggle("Noclip", false, getCallback("Movement%%Noclip")):AddKeyBind(nil, "Noclip Bind")
 
     sounds:AddDropdown("Shoot Sound", "None", soundFileList, getCallback("Sounds%%Shoot Sound"))
