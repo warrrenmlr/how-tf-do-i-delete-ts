@@ -10,7 +10,7 @@
     [ UI Library ] - [ Line 1117 ]
     [ Cham Library ] - [ Line 2710 ]
     [ Main Cheat ] - [ Line 2766 ]
-    [ Make UI ] - [ Line 5760 ]
+    [ Make UI ] - [ Line 5778 ]
 
     ~ Credits ~
 
@@ -2875,11 +2875,12 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     }))
     
-    local astar = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/request/library/Pathfinding"))() -- fucking flies so it despawns now. ill make pathfinding that stays on the ground
+    --local astar = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/request/library/Pathfinding"))() -- fucking flies so it despawns now. ill make pathfinding that stays on the ground
+    --astar.maxtime = 0.33
+    --astar.interval = 12  --  8 to 16 is good
+    --astar.ignorelist = {workspace.Players, camera, ignore, hitboxObjects, backtrackObjects}
 
-    astar.maxtime = 0.33
-    astar.interval = 12  --  8 to 16 is good
-    astar.ignorelist = {workspace.Players, camera, ignore, hitboxObjects, backtrackObjects}
+    local pathfinding = loadstring(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/pathfinding.lua"))() -- i didnt make this, i did fix it tho cuz pro
 
     local physicsignore = {workspace.Terrain, ignore, workspace.Players, camera, hitboxObjects, backtrackObjects}
     local raycastparameters = RaycastParams.new()
@@ -3071,7 +3072,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         local newOrigin = origin
         local newVelocity = velocity
         local newPenetration = penetration
-        local ignoreList = {table.unpack(astar.ignorelist)}
+        local ignoreList = {table.unpack(physicsignore)}
 
         while (newTime < 1) do
             local frameTime = newFrameTime
@@ -3193,7 +3194,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     
     local teleportData
     local function initTeleport(origin, target)
-        local interval = astar.interval
+        local interval = astar.interval -- broken idc to fix it cuz its not even used anymore
         astar.interval = 5
         local path = astar:findpath(origin, target, 9.9, 0)
         astar.interval = interval
@@ -3328,7 +3329,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             }
             --timeRange = timeSkip
         elseif name == "repupdate" then
-            local position, angles, time = ...
+            local position, angles, angles2, time = ...
             local clockTime = os.clock()
 
             if teleporting then -- pf devs noooooo
@@ -3336,16 +3337,16 @@ LPH_JIT_MAX(function() -- Main Cheat
                     local index = teleportData.index
                     
                     teleportData.time = time
-                    send(self, name, teleportData.path[index], angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+                    send(self, name, teleportData.path[index], angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
     
                     index += 1
                     teleportData.index = index
     
                     if index > teleportData.length then
                         newSpawnCache.lastUpdate = position
-                        send(self, name, position, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+                        send(self, name, position, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                     else
-                        send(self, name, teleportData.path[index], angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+                        send(self, name, teleportData.path[index], angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                     end
     
                     return
@@ -3414,6 +3415,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") then
                 angles = applyAAAngles(angles)
+                angles2 = angles * 0.99
             end
             
             if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
@@ -3440,9 +3442,8 @@ LPH_JIT_MAX(function() -- Main Cheat
             if fly and newSpawnCache.lastUpdate then
                 if not newSpawnCache.lastFlyUpdate or ((clockTime - newSpawnCache.lastFlyUpdate) > flyUpdateDelay) then
                     newSpawnCache.lastFlyUpdate = clockTime
-                    send(self, name, newSpawnCache.lastUpdate, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+                    send(self, name, newSpawnCache.lastUpdate, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                     send(self, name, position, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
-                    newSpawnCache.lastAngles = angles
                     newSpawnCache.lastUpdateTime = time
                     newSpawnCache.lastUpdate = position
                 end
@@ -3451,14 +3452,13 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
 
             if wapus:GetValue("Movement", "Walk Speed") and newSpawnCache.lastUpdate then -- no patch pls :(
-                send(self, name, newSpawnCache.lastUpdate, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+                send(self, name, newSpawnCache.lastUpdate, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                 newSpawnCache.updateDebt += 1
             end
 
-            newSpawnCache.lastAngles = angles
             newSpawnCache.lastUpdateTime = time
             newSpawnCache.lastUpdate = position
-            return send(self, name, position, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+            return send(self, name, position, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
         elseif name == "newbullets" then
             local uniqueId, bulletData, time = ...
 
@@ -3511,7 +3511,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 local slot = args[1]
                 newSpawnCache.slot = slot
 
-                if wapus:GetValue("Knife Bot", "Kill All Enabled") and not wapus:GetValue("Knife Bot", "Only When Holding Knife") then
+                if wapus:GetValue("Knife Bot", "Kill All (May Despawn)") and not wapus:GetValue("Knife Bot", "Only When Holding Knife") then
                     args[1] = 3
                 end
             end
@@ -4666,6 +4666,13 @@ LPH_JIT_MAX(function() -- Main Cheat
         return correctposition(position)
     end
 
+    local pathfindingParams = {
+        step = 3,
+        trials = 1/0,
+        weighting = 400,
+        mindist = 23,
+        maxtime = 1,
+    }
     local raging = false
     local function initKnifeBot()
         local nextScan = 0
@@ -4688,13 +4695,20 @@ LPH_JIT_MAX(function() -- Main Cheat
                             local targetPlayer = closestCharacters[entryIndex]._player
                             
                             if position then
-                                local path = astar:findpath(newSpawnCache.lastUpdate, position, 9.9, 15)
+                                --local path = astar:findpath(newSpawnCache.lastUpdate, position, 9.9, 15)
+                                local result, data = pathfinding.floorAStar({
+                                    start = newSpawnCache.lastUpdate,
+                                    goal = position,
+                                    parameters = pathfindingParams
+                                })
+                                runService.RenderStepped:Wait()
 
-                                if path then
+                                if result == true then
+                                    local path = pathfinding.optimizePath(data.waypoints, 9.9)
                                     local origin = newSpawnCache.lastUpdate
 
                                     local lastPosition = path[#path]
-                                    table.insert(path, 1, origin)
+                                    --table.insert(path, 1, origin)
                                     teleporting = true -- raspy PLEASE
                                     teleportData = {
                                         teleportPosition = lastPosition,
@@ -4737,7 +4751,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     end
 
-    callbackList["Knife Bot%%Kill All Enabled"] = function(state)
+    callbackList["Knife Bot%%Kill All (May Despawn)"] = function(state)
         if state then
             if not raging then
                 task.spawn(initKnifeBot)
@@ -4758,7 +4772,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     end
 
     callbackList["Knife Bot%%Only When Holding Knife"] = function(state)
-        if wapus:GetValue("Knife Bot", "Kill All Enabled") and charInterface.isAlive() and newSpawnCache.slot ~= 3 then
+        if wapus:GetValue("Knife Bot", "Kill All (May Despawn)") and charInterface.isAlive() and newSpawnCache.slot ~= 3 then
             if state then
                 send(network, "equip", newSpawnCache.slot, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
             else
@@ -5316,6 +5330,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             if isHidden then
                 weapon._isHidden = false -- shit fix lmao
                 weapon:hideModel()
+                --characterobject:getArmModels()
             else
                 weapon:showModel()
             end
@@ -5387,6 +5402,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                         position = position,
                         velocity = velocity,
                         angles = angles,
+                        barrelAngles = Vector3.zero,
                         breakcount = 0
                     }, false)
 
@@ -5394,6 +5410,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                     fakeRepObject._receivedPosition = position
                     fakeRepObject._receivedFrameTime = network.getTime()
                     fakeRepObject._lastPacketTime = clockTime
+                    fakeRepObject._lastBarrelAngles = Vector3.zero;
                     fakeRepObject:step(3, true)
                     if currentObj then
                         currentObj.canRenderWeapon = true
@@ -5565,7 +5582,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
-        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All Enabled") then --  and newSpawnCache.hasPinged
+        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All (May Despawn)") then --  and newSpawnCache.hasPinged
             --[[if weapon and weapon._weaponData then
                 weapon:shoot(true)
             end]]
@@ -6075,7 +6092,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     ragebot:AddToggle("Only Shoot Target Status", false, getCallback("Rage Bot%%Only Shoot Target Status")):AddKeyBind(nil, "Target Key Bind")
     ragebot:AddToggle("Whitelist Friendly Status", true, getCallback("Rage Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
 
-    knifebot:AddToggle("Kill All Enabled", false, getCallback("Knife Bot%%Kill All Enabled")):AddKeyBind(nil, "Key Bind")
+    knifebot:AddToggle("Kill All (May Despawn)", false, getCallback("Knife Bot%%Kill All (May Despawn)")):AddKeyBind(nil, "Key Bind")
     knifebot:AddToggle("Only When Holding Knife", false, getCallback("Knife Bot%%Only When Holding Knife"))
     knifebot:AddToggle("Only Kill Target Status", false, getCallback("Knife Bot%%Only Kill Target Status")):AddKeyBind(nil, "Terget Key Bind")
     knifebot:AddToggle("Whitelist Friendly Status", true, getCallback("Knife Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
