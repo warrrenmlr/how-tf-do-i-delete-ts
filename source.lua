@@ -22,7 +22,7 @@
 
     [ BBot ] - [ Inspiration to make such a nice UI and high quality/quantity feature list ]
     [ Legacy ] - [ Best and only beta tester ]
-    
+
 ]]
 
 function LPH_NO_VIRTUALIZE(fuction) -- unnecessary now
@@ -68,7 +68,7 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
     local roundSystem = modules.RoundSystemClientInterface
 
     local clientEvents = debug.getupvalue(debug.getupvalue(network._init, 2), 2)
-    
+
     game:GetService("RunService"):Set3dRenderingEnabled(false) -- increase performance              bruh why this doesnt work on nihon idk if it works on other executors
 
     local function isKickInProgress()
@@ -81,7 +81,7 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
             if string.find(message, "has initiated a votekick on") then
                 local initiator = string.split(message, " has initiated")[1]
                 local victim = string.split(string.split(message, "initiated a votekick on ")[2], " for ")[1]
-                
+
                 repeat task.wait() until isKickInProgress()
 
                 if victim == hostName then -- meanie tried to votekick u
@@ -91,11 +91,11 @@ if isfolder(folderName) and isfolder(folderName .. "/cache") and isfolder(folder
                 end
             end
         end)
-        
+
         return console(message)
     end
 
-    repeat 
+    repeat
         repeat task.wait() until not roundSystem.roundLock
         charInterface.spawn()
         repeat task.wait() until charInterface.isAlive() and charInterface.getCharacterObject() and charInterface.getCharacterObject():canJump()
@@ -108,7 +108,7 @@ end
 
 LPH_NO_VIRTUALIZE(function()
 workspace:FindFirstChild("nigga stop deobfuscating my script you black monkey nigger - iray") -- theres this bitch nigga named isse (@723741691583922209)
-do -- Drawing Library 
+do -- Drawing Library
     local drawing = {}
     local cache = {
         updates = {},
@@ -116,7 +116,7 @@ do -- Drawing Library
         shapes = {}
     }
 
-    local leftTriangleId = "http://www.roblox.com/asset/?id=18975909718" -- "http://www.roblox.com/asset/?id=17661400876" 2 
+    local leftTriangleId = "http://www.roblox.com/asset/?id=18975909718" -- "http://www.roblox.com/asset/?id=17661400876" 2
     local rightTriangleId = "http://www.roblox.com/asset/?id=18975907988" -- "http://www.roblox.com/asset/?id=17661399529" 1
 
     local folder = Instance.new("ScreenGui")
@@ -253,7 +253,7 @@ do -- Drawing Library
             for _, object in entity._data.drawings.lines do
                 object:Destroy()
             end
-            
+
             for _, objects in entity._data.drawings.triangles do
                 objects[1]:Destroy()
                 objects[2]:Destroy()
@@ -322,17 +322,17 @@ do -- Drawing Library
             data.index = #cache.shapes + 1
             data.shape = shape
             cache.shapes[data.index] = circle
-            
+
             for i = 1, 8 do
                 local newLine = newFrame()
                 newLine.AnchorPoint = v2.new(0.5, 0.5)
                 table.insert(data.drawings.lines, newLine)
             end
-            
+
             for i = 1, 8 do
                 table.insert(data.drawings.triangles, {newTriangle()})
             end
-            
+
             table.insert(cache.instances, data.drawings)
             return setmetatable(circle, newMetatable)
         elseif shape == "Image" then
@@ -411,7 +411,7 @@ do -- Drawing Library
             for i = 1, 2 do
                 table.insert(data.drawings.triangles, {newTriangle()})
             end
-            
+
             table.insert(cache.instances, data.drawings)
             return setmetatable(triangle, newMetatable)
         else
@@ -461,7 +461,7 @@ do -- Drawing Library
             p1 = h1
             p2 = c0
         end
-        
+
         return p0, p1, p2
     end
 
@@ -513,7 +513,11 @@ do -- Drawing Library
         right.Rotation = rotation
     end
 
+    local lastRender = tick();
     local function render()
+        if tick() - lastRender < 1/30 then return end;
+
+        lastRender = tick();
         for shapeIndex, updateList in cache.updates do
             local shape = cache.shapes[shapeIndex]._data
 
@@ -601,7 +605,7 @@ do -- Drawing Library
                         size = v2.new(size.X, math.abs(size.Y))
                         position = v2.new(position.X, position.Y - size.Y)
                     end
-                    
+
                     local realThick = shape.Thickness
                     local thick = realThick - 1
                     local thicknessOffset = math.floor(thick * 0.5 + 0.5)
@@ -686,7 +690,7 @@ do -- Drawing Library
                 end
             elseif shape.shape == "Circle" then
                 local drawings = shape.drawings
-                
+
                 if updateList.NumSides then
                     for _, triangle in drawings.triangles do
                         for _, drawing in triangle do
@@ -700,27 +704,27 @@ do -- Drawing Library
 
                     drawings.lines = {}
                     drawings.triangles = {}
-                    
+
                     for _ = 1, updateList.NumSides do
                         local newLine = newFrame()
                         newLine.AnchorPoint = v2.new(0.5, 0.5)
                         table.insert(drawings.lines, newLine)
                         table.insert(drawings.triangles, {newTriangle()})
                     end
-                    
+
                     updateList.Filled = shape.Filled
                     updateList.Visible = shape.Visible
                     updateList.Transparency = shape.Transparency
                     updateList.Color = shape.Color
                     updateList.ZIndex = shape.ZIndex
                 end
-                
+
                 if updateList.Position or updateList.Thickness or updateList.Radius or updateList.NumSides then
                     local position = shape.Position
                     local size = shape.Radius
                     local num = shape.NumSides
                     local interval = 2 * math.pi / num
-                    
+
                     for lineIndex = 1, num do
                         local origin = (lineIndex - 1) * interval
                         local target = lineIndex * interval
@@ -739,7 +743,7 @@ do -- Drawing Library
                         line.Position = UDim2.new(0, middle.X, 0, middle.Y) -- middle
                         line.Rotation = math.deg(math.atan(offset.Y / offset.X))
                         line.Size = UDim2.new(0, math.floor(distance + 0.5), 0, math.abs(shape.Thickness))
-                        
+
                         local rotation = math.deg((lineIndex - 0.5) * interval - (math.pi * 0.5))
                         local leftPosition = (lineIndex - 1) * interval
                         leftPosition = position + v2.new(math.cos(leftPosition), math.sin(leftPosition)) * size * 0.5
@@ -761,7 +765,7 @@ do -- Drawing Library
                                 drawing.Visible = updateList.Filled
                             end
                         end
-                        
+
                         for _, drawing in drawings.lines do
                             drawing.Visible = not updateList.Filled
                         end
@@ -798,7 +802,7 @@ do -- Drawing Library
                     for _, drawing in drawings.lines do
                         drawing.BackgroundColor3 = updateList.Color
                     end
-                    
+
                     for _, triangle in drawings.triangles do
                         for _, drawing in triangle do
                             drawing.ImageColor3 = updateList.Color
@@ -822,10 +826,10 @@ do -- Drawing Library
 
                 if updateList.PointA or updateList.PointB or updateList.PointC or updateList.Thickness then
                     local a, b, c = shape.PointA, shape.PointB, shape.PointC
-                    
+
                     if a and b and c and a ~= b and a ~= c and b ~= c then
                         local p0, p1, p2 = getPointOrder(a, b, c)
-                        
+
                         local line1, line2, line3 = drawings.a, drawings.b, drawings.c
                         local d1 = p1 - p0
                         local mp1 = p0 + d1 * 0.5
@@ -893,13 +897,13 @@ do -- Drawing Library
                 end
             elseif shape.shape == "Quad" then
                 local drawings = shape.drawings
-                
+
                 if updateList.PointA or updateList.PointB or updateList.PointC or updateList.PointD or updateList.Thickness then
                     local p0 = shape.PointA
                     local p1 = shape.PointB
                     local p2 = shape.PointC
                     local p3 = shape.PointD
-                    
+
                     if p0 and p1 and p2 and p3 and p0 ~= p1 and p0 ~= p2 and p0 ~= p3 and p1 ~= p2 and p1 ~= p3 and p2 ~= p3 then
                         local intersects = false
                         local intersection
@@ -914,77 +918,77 @@ do -- Drawing Library
                             {p2, p3, m3, p2.Y - m3 * p2.X},
                             {p3, p0, m4, p3.Y - m4 * p3.X}
                         }
-                        
+
                         for lineIndex = 1, 2 do -- checking if lines in quad intersect
                             local lineData = lines[lineIndex]
                             local o1, t1, s1, b1 = table.unpack(lineData)
-                            
+
                             if not intersects then
                                 local opposite = lineIndex + 2
                                 local o2, t2, s2, b2 = table.unpack(lines[opposite])
                                 local ix = (b2 - b1) / (s1 - s2)
-                                
+
                                 local x11, x12 = o1.X, t1.X
                                 if x11 > x12 then
                                     local temp = x11
                                     x11 = x12
                                     x12 = temp
                                 end
-                                        
+
                                 local x21, x22 = o2.X, t2.X
                                 if x21 > x22 then
                                     local temp = x21
                                     x21 = x22
                                     x22 = temp
                                 end
-                                        
+
                                 if ix > x11 + 1 and ix < x12 - 1 and ix > x21 + 1 and ix < x22 - 1 then
                                     intersects = lineIndex + 1
                                     intersection = v2.new(ix, s2 * ix + b2)
                                 end
                             end
                         end
-                        
+
                         local obtuse
                         if not intersects then -- if not intersecting then gets the point with the biggest angle, 2 scalene triangles will share that point and the opposite point
                             local biggestAngle = 0
                             local biggestLine
                             local total = 0
-                            
+
                             for lineIndex = 1, 4 do
                                 local o0 = lines[(lineIndex == 1 and 4) or lineIndex - 1][1]
                                 local o1, t1 = table.unpack(lines[lineIndex])
                                 local supangle = (o0 - o1).Unit:Dot((t1 - o1).Unit)
                                 local angle
-                                
+
                                 if supangle < 0 then
                                     angle = 2 + supangle
                                 else
                                     angle = 1 - math.abs(supangle)
                                 end
-                                
+
                                 total = total + angle
-                                
+
                                 if angle >= biggestAngle then
                                     biggestLine = lineIndex
                                     biggestAngle = angle
                                 end
                             end
-                            
+
                             obtuse = biggestLine
                         end
-                        
+
                         for sideIndex = 1, 4 do
                             local line = drawings.lines[sideIndex]
                             local h1, h2, m, b = table.unpack(lines[sideIndex])
-                            
+
                             local d = h2 - h1
                             local mp = h1 + d * 0.5
                             line.Position = UDim2.new(0, mp.X, 0, mp.Y) -- middle
                             line.Rotation = math.deg(math.atan(d.Y / d.X))
                             line.Size = UDim2.new(0, math.floor(d.Magnitude + 0.5), 0, math.abs(shape.Thickness))
                         end
-                        
+
                         if intersects then
                             local l1 = lines[intersects]
                             local l2 = lines[intersects == 3 and 1 or 4]
@@ -1456,7 +1460,7 @@ do -- UI Library
         if value and value ~= "None" then
             self.text.Size = 14
             self.text.Text = value
-            
+
             task.spawn(function()
                 while self.text.TextBounds.X > self.button.Size.X do
                     self.text.Size = self.text.Size - 1
@@ -1473,13 +1477,13 @@ do -- UI Library
         else
             self.text.Size = 14
             self.text.Text = "None"
-            
+
             if self.keyIndex then
                 self.menu.keybinds[self.keyIndex] = nil
                 self.keyIndex = nil
             end
         end
-        
+
         if self.menu.UpdateKeyList then
             self.menu.UpdateKeyList()
         end
@@ -1492,7 +1496,7 @@ do -- UI Library
             if name then
                 self.section.flags[name] = keybind
             end
-            
+
             default = default ~= "" and default or "None"
             keybind.toggle = self
             keybind.value = default
@@ -1521,7 +1525,7 @@ do -- UI Library
         if self.callback then
             self.callback(value)
         end
-        
+
         if self.menu.keys and self.menu.keys.updateList then
             self.menu.keys.updateList()
         end
@@ -1633,21 +1637,21 @@ do -- UI Library
         local data = list.playerdata
         local status = list.playerstatus
         local drawings = list.playerdrawings
-        
+
         local function updateListText()
             for _, drawingData in drawings do
                 drawingData.name.Text = ""
                 drawingData.team.Text = ""
                 drawingData.status.Text = ""
             end
-            
+
             local scrollmax = math.max(#data - 9, 0)
             local scrollcount = math.min(list.scrollcount, scrollmax)
             list.scrollcount = scrollcount
-            
+
             for playerIndex = 1, 9 do
                 local player = data[playerIndex - scrollcount]
-                
+
                 if player then
                     local islocal = player == localplayer
                     local isteamed = player.Team ~= nil
@@ -1660,7 +1664,7 @@ do -- UI Library
                 end
             end
         end
-        
+
         local function setTeam(player, team)
             for playerIndex = 1, #data do
                 if data[playerIndex].Team == team then
@@ -1669,25 +1673,25 @@ do -- UI Library
                 end
             end
         end
-        
+
         local function updateTeam(player)
             player:GetPropertyChangedSignal("Team", function(team)
                 table.remove(data, table.find(data, player))
                 setTeam(player, team)
             end)
         end
-        
+
         local teams = {}
         for _, player in players:GetPlayers() do
             local team = player.Team or "Nil"
-            
+
             if not teams[team] then
                 teams[team] = {}
             end
-            
+
             insert(teams[team], player)
         end
-        
+
         for _, team in teams do
             for _, player in team do
                 insert(data, player)
@@ -1696,32 +1700,32 @@ do -- UI Library
         end
 
         updateListText()
-        
+
         table.insert(connectionList, players.PlayerAdded:Connect(function(player)
             if player.Team then
                 setTeam(player, player.Team)
             end
-            
+
             updateTeam(player)
             updateListText()
         end))
-        
+
         table.insert(connectionList, players.PlayerRemoving:Connect(function(player)
             table.remove(data, table.find(data, player))
-            
+
             if table.find(status, player) then
                 status[player] = nil
             end
-            
+
             if list.selected == player then
                 list.playerPFP.Data = blankData
                 list.playertext.Text = "No Player Selected"
                 list.selected = nil
             end
-            
+
             updateListText()
         end))
-        
+
         return updateListText
     end
 
@@ -1821,7 +1825,7 @@ do -- UI Library
                 drawing:Remove()
             end)
         end
-        
+
         self.keys = nil
         self.DestroyKeyList = nil
         self.UpdateKeyList = nil
@@ -1849,37 +1853,37 @@ do -- UI Library
                     keyData[1]:Remove()
                 end
             end
-            
+
             local newkeybinds = {}
-            
+
             for _, keyData in self.keybinds do
                 local keyName, keybind = table.unpack(keyData)
                 local text = keybind.toggle.section.text.Text .. ": " .. keybind.toggle.text.Text
-                
+
                 if keys.include then
                     text = text .. " [ " .. keyName .. " ]"
                 end
-                
+
                 insert(newkeybinds, {keys:draw("Text", {Size = 16, Color = wapus.theme.text, Text = text, Visible = true}, "text"), keybind})
             end
-            
+
             keys.keybinds = newkeybinds
         end
-        
+
         local function updateList()
             local keycount = #keys.keybinds
             local height = 23 + 16 * keycount
             local width = 150
-            
+
             for _, bindData in keys.keybinds do
                 local text, keybind = table.unpack(bindData)
                 local bounds = text.TextBounds.X + 4
-                
+
                 if bounds > width then
                     width = bounds
                 end
             end
-            
+
             local size = v2(width, height)
             keys.outline.Position = v2(9, workspace.CurrentCamera.ViewportSize.Y * 0.5 - height * 0.5 - 1)
             keys.outline.Size = size + v2(2, 2)
@@ -1892,14 +1896,14 @@ do -- UI Library
             keys.highlight.Position = keys.background.Position
             keys.highlight.Size = v2(width, 3)
             keys.title.Position = keys.background.Position + v2(2, 3)
-            
+
             for keyIndex = 1, keycount do
                 local text, keybind = table.unpack(keys.keybinds[keyIndex])
                 text.Color = keybind.toggle.value and white or darker
                 text.Position = keys.title.Position + v2(0, keyIndex * 16 + 1)
             end
         end
-        
+
         local function updateKeyList()
             updateKeybinds()
             runService.RenderStepped:Wait()
@@ -2119,7 +2123,7 @@ do -- UI Library
                         local textBox = Instance.new("TextBox", screenGui) -- first person to tell iray where this is pasted from with proof gets a free nihon key
                         textBox.TextTransparency = 1
                         textBox:CaptureFocus()
-                        keypress(0x11)  
+                        keypress(0x11)
                         keypress(0x56)
                         task.wait(1/60)
                         keyrelease(0x11)
@@ -2165,7 +2169,7 @@ do -- UI Library
                 for _, keyData in menuData.keybinds do
                     if key == keyData[1] then
                         keyData[2].toggle:SetValue(not keyData[2].toggle.value)
-                        
+
                         if menuData.keys and menuData.keys.updateList then
                             menuData.keys.updateList()
                         end
@@ -2258,7 +2262,11 @@ do -- UI Library
     local pickerUpdateFPS = 60 -- limiting update speed to reduce lag
     local pickerUpdateRate = 1 / pickerUpdateFPS
     local wasDown = false
+
+    local lastMenuRefresh = tick();
     table.insert(connectionList, runService.RenderStepped:Connect(function(delta)
+        if tick() - lastMenuRefresh < 1/30 then return end;
+        lastMenuRefresh = tick();
         local down = userInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
         local clicked = down and not wasDown
         wasDown = down
@@ -2299,12 +2307,12 @@ do -- UI Library
 
                 return
             end
-            
+
             if statusdropping then
                 if clicked then
                     local mouse = userInputService:GetMouseLocation()
                     local selectedstatus
-                    
+
                     for _, buttonData in statusdropping.buttons do
                         if checkDrawing(mouse, buttonData.button) then
                             selectedstatus = buttonData.status
@@ -2322,10 +2330,10 @@ do -- UI Library
                         statusdropping.list.status(player, selectedstatus)
                         statusdropping.list.updatelist()
                     end
-                    
+
                     statusdropping = nil
                 end
-                
+
                 return
             end
 
@@ -2522,14 +2530,14 @@ do -- UI Library
                                         if checkDrawing(mouse, sectionData.playerBoxBackground) then
                                             local index = math.min(math.ceil((mouse.Y - sectionData.playerBoxBackground.Position.Y) / 23), 9)
                                             local player = sectionData.playerdata[index - sectionData.scrollcount]
-                                            
+
                                             if player and player ~= localplayer then
                                                 sectionData.selected = player
                                                 sectionData.playerPFP.Data = players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) or blankData
                                                 sectionData.playertext.Text = player.Name
                                             end
                                         end
-                                        
+
                                         if sectionData.selected then
                                             if checkDrawing(mouse, sectionData.votekickbuttonoutline) then
                                                 sectionData.votekick(sectionData.selected)
@@ -2538,11 +2546,11 @@ do -- UI Library
                                             if checkDrawing(mouse, sectionData.spectatebuttonoutline) then
                                                 sectionData.votekick(sectionData.selected)
                                             end
-                                            
+
                                             local statusButton = sectionData.statusbuttonoutline
                                             if checkDrawing(mouse, statusButton) then
                                                 statusdropping = {list = sectionData, buttons = {}, drawCache = {}, draw = draw}
-                                                
+
                                                 for statusIndex = 1, #sectionData.statuslist + 1 do
                                                     local statusName = statusIndex == 1 and "None" or sectionData.statuslist[statusIndex - 1]
                                                     local buttonData = {}
@@ -2630,7 +2638,7 @@ do -- UI Library
                                                                 local h, s, v = color.value:ToHSV()
                                                                 picker.current = {h, s, v}
                                                                 local startPos = picker.hsvOutline.Position + v2(1, 1)
-                                                                
+
                                                                 -- lol
                                                                 --for x = 0, xMax do -- lags cuz almost 7k drawings created here
                                                                 --	picker.colordrawings[x] = {}
@@ -2641,22 +2649,22 @@ do -- UI Library
                                                                 --		picker.colordrawings[x][y] = picker:draw("Square", {Position = startPos + v2(x * xStepPX, y * yStepPX), Size = v2(xStepPX, yStepPX), Color = Color3.fromHSV(h, sat, value), Visible = true})
                                                                 --	end
                                                                 --end
-                                                                
+
                                                                 picker.hueSquare = picker:draw("Square", {Position = picker.hsvOutline.Position + v2(1, 1), Size = v2(166, 166), Color = Color3.fromHSV(h, 1, 1), Visible = true, ZIndex = 4})
                                                                 picker.satSquare = picker:draw("Square", {Position = picker.hsvOutline.Position + v2(1, 1), Size = v2(166, 166), Color = Color3.fromHSV(0, 0, 1), Visible = true, ZIndex = 4})
                                                                 picker.valSquare = picker:draw("Square", {Position = picker.hsvOutline.Position + v2(1, 1), Size = v2(166, 166), Color = Color3.fromHSV(0, 1, 0), Visible = true, ZIndex = 4})
-                                                                
+
                                                                 for i = 1, 2 do
                                                                     local parent = i == 1 and "satSquare" or "valSquare"
                                                                     local uiGradient = Instance.new("UIGradient", picker[i == 1 and "satSquare" or "valSquare"]._data.drawings.box)
                                                                     uiGradient.Transparency = NumberSequence.new(0, 1)
-                                                                    
+
                                                                     if i == 2 then
                                                                         uiGradient.Rotation = 270
                                                                     end
                                                                 end
-                                                                
-                                                                
+
+
                                                                 picker.hsvButtonOutline = picker:draw("Square", {Position = startPos + v2(s * 166 - 2, (1 - v) * 166 - 2), Size = v2(5, 5), Filled = false, Thickness = 1, Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.hsvButton = picker:draw("Square", {Position = picker.hsvButtonOutline.Position + v2(1, 1), Size = v2(3, 3), Filled = false, Thickness = 1, Color = Color3.new(1, 1, 1), Visible = true, ZIndex = 4})
                                                                 picker.hueButtonOutline = picker:draw("Square", {Position = picker.hue.Position + v2(-3, (1 - h) * 166 - 3), Size = v2(16, 5), Filled = false, Thickness = 1, Color = wapus.theme.outline, Visible = true, ZIndex = 4})
@@ -2707,7 +2715,7 @@ do -- UI Library
     end))
 end
 
-do -- Cham Library 
+do -- Cham Library
     local cache = {}
 
     function cham.new(model, properties, hideParts, deleteImages, ignoreTransparency)
@@ -2722,7 +2730,7 @@ do -- Cham Library
             local function uncache()
                 table.remove(cache, table.find(cache, data))
             end
-            
+
             local function classify(part)
                 if part:IsA("BasePart") then
                     table.insert(controlled, part)
@@ -2730,31 +2738,36 @@ do -- Cham Library
                     part:Destroy()
                 end
             end
-            
+
             for _, part in parts do
                 classify(part)
             end
-            
+
             table.insert(connectionList, model.DescendantAdded:Connect(classify))
-            
+
             return properties, uncache
         end
     end
 
+    local lastChamCheck = tick();
     table.insert(connectionList, game:GetService("RunService").RenderStepped:Connect(function()
+        if tick() - lastChamCheck < 1/60 then return end;
+        lastChamCheck = tick();
+
         for _, data in cache do
             if data.model:IsDescendantOf(workspace) then
                 for _, part in data.parts do
                     if data.hide and table.find(data.hide, part) then
                         part.Transparency = 1
-                    elseif (part.Transparency < 1) or data.ignore then
-                        for i, v in data.properties do
-                            if i == "Color" and part:IsA("SpecialMesh") then
-                                part.VertexColor = Vector3.new(v.R * 1.2, v.G * 1.2, v.B * 1.2)
-                            end
+                    end;
 
-                            part[i] = v
+                    if part.Transparency == 1 then continue end;
+                    for i, v in data.properties do
+                        if i == "Color" and part:IsA("SpecialMesh") then
+                            part.VertexColor = Vector3.new(v.R * 1.2, v.G * 1.2, v.B * 1.2)
                         end
+
+                        part[i] = v
                     end
                 end
             end
@@ -2824,7 +2837,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
     getfenv(cameraInterface.setCameraType).print = function() end -- fix third person console spam
     getfenv(cameraInterface.setCameraType).warn = function() end
-    
+
     local players = game:GetService("Players")
     local lighting = game:GetService("Lighting")
     local workspace = game:GetService("Workspace")
@@ -2839,7 +2852,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     local currentObj, started, fakeRepObject, aimbotting
     local movementCache = {time = {}, position = {}}
     local ticketCache = {}
-    
+
     local backtrackObjects = Instance.new("Folder", workspace)
     local hitboxObjects = Instance.new("Folder", workspace)
     local aimbotfov = drawing.new("Circle")
@@ -2874,7 +2887,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             return
         end
     }))
-    
+
     --local astar = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/request/library/Pathfinding"))() -- fucking flies so it despawns now. ill make pathfinding that stays on the ground
     --astar.maxtime = 0.33
     --astar.interval = 12  --  8 to 16 is good
@@ -2926,15 +2939,15 @@ LPH_JIT_MAX(function() -- Main Cheat
     local function getClosestPlayers(position, ignoreCheck, onlyTargets, useWhitelist)
         local closestCharacters
         local characterData
-    
+
         replicationInterface.operateOnAllEntries(function(player, entry)
             local character = entry._thirdPersonObject and entry._thirdPersonObject._characterModelHash
-    
+
             if entry._receivedPosition and entry._velspring.t and character and player.Team ~= localplayer.Team and character.Head and (not ignoreCheck or (not killedPlayers[player] and not ignoredPlayers[player])) then
                 if (not useWhitelist or playerStatus[player] ~= "Friendly") and (not onlyTargets or playerStatus[player] == "Target") then
                     local playerDistance = (character.Head.Position - position).Magnitude
                     local playerData = {character, playerDistance}
-                    
+
                     if not characterData then
                         characterData = {playerData}
                         closestCharacters = {entry}
@@ -2946,7 +2959,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                                 break
                             end
                         end
-        
+
                         if not table.find(characterData, playerData) then
                             table.insert(characterData, 1, playerData)
                             table.insert(closestCharacters, 1, entry)
@@ -2955,7 +2968,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 end
             end
         end)
-    
+
         return closestCharacters
     end
 
@@ -3039,7 +3052,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             return
         end
     end
-    
+
     local function complexTrajectory(o, a, t, s, e) -- thank you mickey
         local ld = t - o
         a = -a
@@ -3084,7 +3097,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 local normal = motion.unit
                 local maxExtent = hit.Size.magnitude * normal
                 local _, exit = raycast(enter + maxExtent, -maxExtent, {hit}, true)
-                
+
                 if exit then
                     canShoot = true
                     newPenetration = newPenetration - normal:Dot(exit - enter)
@@ -3130,14 +3143,14 @@ LPH_JIT_MAX(function() -- Main Cheat
         if offset then
             local cframe = CFrame.new(origin, target) * CFrame.Angles(0, 0, math.rad(math.random(1, 90)))
             local offsets = {}
-    
+
             for vertexIndex = 1, #scanVerticies do
                 table.insert(offsets, cframe * (scanVerticies[vertexIndex] * offset))
             end
-    
+
             return offsets
         end
-    
+
         return {origin}
     end
 
@@ -3163,25 +3176,25 @@ LPH_JIT_MAX(function() -- Main Cheat
 
         return raycastFunc(origin, direction, ignoreList, ignoreFunc, a5)
     end
-    
+
     local raycastStep = 1 / 30 -- 60 for more accuracy
     local function scanPositions(origin, target, accel, speed, penetration)
         local origins = getPositionOffsets(origin, target, wapus:GetValue("Rage Bot", "Fire Position Scanning") and wapus:GetValue("Rage Bot", "Fire Position Offset"))
         local targets = getPositionOffsets(target, origin, wapus:GetValue("Rage Bot", "Hit Position Scanning") and wapus:GetValue("Rage Bot", "Hit Position Offset"))
-    
+
         for originIndex = 1, #origins do
             local newOrigin = origins[originIndex]
-            
+
             for targetIndex = 1, #targets do
                 local newTarget = targets[targetIndex]
                 local velocity, hitTime = trajectory(newOrigin, accel, newTarget, speed)
-    
+
                 if bulletcheck(newOrigin, newTarget, velocity, accel, penetration, raycastStep) then
                     return newOrigin, newTarget, velocity, hitTime
                 end
             end
         end
-    
+
         return false
     end
 
@@ -3191,7 +3204,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         --return weapon and not weapon._aiming and weapon._barrelPart and camera:WorldToViewportPoint(weapon._barrelPart.Position + weapon._barrelPart.CFrame.LookVector * (weapon._barrelPart.Size.Z / 2 + 15)) -- FrontMan
         return weapon and not weapon._aiming and weapon._barrelPart and camera:WorldToViewportPoint(weapon._barrelPart.CFrame * Vector3.new(0, 0, -100))
     end
-    
+
     local teleportData
     local function initTeleport(origin, target)
         local interval = astar.interval -- broken idc to fix it cuz its not even used anymore
@@ -3278,6 +3291,9 @@ LPH_JIT_MAX(function() -- Main Cheat
     local fakeWeapons = {}
     local chanceOne, chanceTwo
     local send = network.send
+    local fakelag = {
+        lastRefreshPosition = nil;
+    };
     function network:send(name, ...)
         if wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character") then
             if name == "spawn" then
@@ -3335,20 +3351,20 @@ LPH_JIT_MAX(function() -- Main Cheat
             if teleporting then -- pf devs noooooo
                 if not teleportData.time then -- fucking nigger leaked my source so i had to go open source yk
                     local index = teleportData.index
-                    
+
                     teleportData.time = time
                     send(self, name, teleportData.path[index], angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
-    
+
                     index += 1
                     teleportData.index = index
-    
+
                     if index > teleportData.length then
                         newSpawnCache.lastUpdate = position
                         send(self, name, position, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                     else
                         send(self, name, teleportData.path[index], angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                     end
-    
+
                     return
                 else
                     if teleportData.index > teleportData.length then
@@ -3360,10 +3376,10 @@ LPH_JIT_MAX(function() -- Main Cheat
                                 root.Position = teleportData.teleportPosition
                             end
                         end
-                        
+
                         teleporting = false
                     end
-    
+
                     teleportData.time = nil
                     return
                 end
@@ -3374,7 +3390,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                     local rootPart = charInterface.getCharacterObject():getRealRootPart()
                     local partList = workspace:GetPartsInPart(rootPart, OverlapParams.new())
                     local touching = {}
-    
+
                     for _, part in partList do
                         local ignore = false
 
@@ -3384,23 +3400,23 @@ LPH_JIT_MAX(function() -- Main Cheat
                                 continue
                             end
                         end
-    
+
                         if not ignore then
                         table.insert(touching, part)
                         end
                     end
-    
+
                     if #touching == 0 then
                         if initTeleport(newSpawnCache.lastUpdate, position) ~= false then
                             newSpawnCache.noclipping = false
                         end
                     end
                 end
-    
+
                 return
             elseif wapus:GetValue("Movement", "Noclip") and newSpawnCache.lastUpdate then
                 local hit = raycast(newSpawnCache.lastUpdate, position - newSpawnCache.lastUpdate, physicsignore)
-    
+
                 if hit then
                     newSpawnCache.noclipping = true
                     newSpawnCache.noclipstart = clockTime + 0.1
@@ -3413,11 +3429,38 @@ LPH_JIT_MAX(function() -- Main Cheat
                 return
             end
 
+            if wapus:GetValue('Anti Aim', 'Fake Lag') then
+                if not fakelag.lastRefreshPosition or not fakelag.lastRefreshTime then
+                    fakelag.lastRefreshPosition = position;
+                    fakelag.lastRefreshTime = tick();
+                end;
+
+
+                if ((position - fakelag.lastRefreshPosition).Magnitude > wapus:GetValue('Anti Aim', 'Refresh Distance')) or tick() - fakelag.lastRefreshTime > wapus:GetValue('Anti Aim', 'Refresh Rate') then
+                    fakelag.lastRefreshPosition = position;
+                    fakelag.lastRefreshTime = tick();
+
+                    if wapus:GetValue('Anti Aim', 'Randomize Position') then
+                        local xaxis, yaxis, zaxis = wapus:GetValue('Anti Aim', 'X-Axis Factor'), 0, wapus:GetValue('Anti Aim', 'Z-Axis Factor');
+                        local xoff, yoff, zoff = math.random(-xaxis, xaxis), math.random(-yaxis, yaxis), math.random(-zaxis, zaxis);
+
+                        position += Vector3.new(xoff, yoff, zoff);
+                    end;
+
+                    send(self, name, position, angles, (time - (1 / 70)) + newSpawnCache.latency + newSpawnCache.currentAddition)
+                else
+                    return;
+                end;
+            else
+                fakelag.lastRefreshPosition = nil;
+                fakelag.lastRefreshTime = tick();
+            end;
+
             if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") then
                 angles = applyAAAngles(angles)
                 angles2 = angles * 0.99
             end
-            
+
             --if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
             --    newSpawnCache.lastOffsetUpdate = newSpawnCache.lastOffsetUpdate or time
             --
@@ -3438,23 +3481,23 @@ LPH_JIT_MAX(function() -- Main Cheat
             --    newSpawnCache.lastOffsetUpdate = time
             --end
 
-            local fly = false --wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)"))
-            if fly and newSpawnCache.lastUpdate then
-                if not newSpawnCache.lastFlyUpdate or ((clockTime - newSpawnCache.lastFlyUpdate) > flyUpdateDelay) then
-                    newSpawnCache.lastFlyUpdate = clockTime
-                    send(self, name, newSpawnCache.lastUpdate, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
-                    send(self, name, position, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
-                    newSpawnCache.lastUpdateTime = time
-                    newSpawnCache.lastUpdate = position
-                end
-
-                return
-            end
+            --local fly = false --wapus:GetValue("Movement", "Fly") or (wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)"))
+            --if fly and newSpawnCache.lastUpdate then
+            --    if not newSpawnCache.lastFlyUpdate or ((clockTime - newSpawnCache.lastFlyUpdate) > flyUpdateDelay) then
+            --        newSpawnCache.lastFlyUpdate = clockTime
+            --        send(self, name, newSpawnCache.lastUpdate, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+            --        send(self, name, position, angles, time + newSpawnCache.latency + newSpawnCache.currentAddition)
+            --        newSpawnCache.lastUpdateTime = time
+            --        newSpawnCache.lastUpdate = position
+            --    end
+            --
+            --    return
+            --end
 
             if wapus:GetValue("Movement", "Walk Speed") and newSpawnCache.lastUpdate then -- no patch pls :(
                 send(self, name, newSpawnCache.lastUpdate, angles, angles2, time + newSpawnCache.latency + newSpawnCache.currentAddition)
                 newSpawnCache.updateDebt += 1
-            end
+            end;
 
             newSpawnCache.lastUpdateTime = time
             newSpawnCache.lastUpdate = position
@@ -3478,7 +3521,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 if target then
                     local player = entry._player
                     local velocity = complexTrajectory(bulletData.firepos, publicSettings.bulletAcceleration, target, weaponInterface.getActiveWeaponController():getActiveWeapon()._weaponData.bulletspeed, (movementCache.position[player][15] - movementCache.position[player][1]) / (movementCache.time[15] - movementCache.time[1])).Unit
-                    
+
                     for _, bullet in bulletData.bullets do
                         bullet[1] = velocity
                     end
@@ -3521,7 +3564,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         elseif name == "ping" then
             local a, b, c = ...
             newSpawnCache.hasPinged = true
-            
+
             --if wapus:GetValue("Rage Bot", "Enabled") and wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then -- idk if this needs to be here i think it helps a little
             --    if newSpawnCache.lastUpdate and newSpawnCache.lastOffsetUpdate then
             --        local time = network.getTime()
@@ -3562,16 +3605,16 @@ LPH_JIT_MAX(function() -- Main Cheat
                 local class = playerDataUtils.getClassData(playerData).curclass
                 local newPlayerData = table.clone(playerData)
                 newPlayerData.unlockAll = false
-        
+
                 if slot == "Primary" then
                     fakeWeapons[class][1] = weapon
-        
+
                     if playerDataUtils.ownsWeapon(newPlayerData, weapon) then
                         realWeapons[class][1] = weapon
                     end
                 elseif slot == "Secondary" then
                     fakeWeapons[class][2] = weapon
-        
+
                     if playerDataUtils.ownsWeapon(newPlayerData, weapon) then
                         realWeapons[class][2] = weapon
                     end
@@ -3593,7 +3636,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 return send(self, name, stance)
             end
         end
-        
+
         return send(self, name, ...)
     end
 
@@ -3611,7 +3654,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         if currentObj then
             currentObj:buildWeapon(slot) -- does this func even do anything? im not gonna try removing it
         end
-        
+
         return preparePickUpFirearm(self, slot, name, attachments, attData, camoData, magAmmo, spareAmmo, newId, wasClient, ...)
     end
 
@@ -3627,7 +3670,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         if currentObj then
             currentObj:buildWeapon(3)
         end
-        
+
         return preparePickUpMelee(self, name, camoData, newId, wasClient, ...)
     end
 
@@ -3635,7 +3678,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     --function screenCull.step(...)
     screenCull.step = LPH_NO_VIRTUALIZE(function(...)
         step(...)
-        
+
         if wapus:GetValue("Third Person", "Enabled") then
             local controller = weaponInterface.getActiveWeaponController()
 
@@ -3679,7 +3722,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 local data = controller:getActiveWeapon():getWeaponData()
                 local displayname = data.displayname or data.name
                 local name = fakeWeapons[playerDataUtils.getClassData(playerClient.getPlayerData()).curclass][controller:getActiveWeaponIndex()]
-        
+
                 if displayname == name then
                     local serverSpeed = contentDatabase.getWeaponData(name).bulletspeed
                     bulletData.velocity = bulletData.velocity.Unit * serverSpeed
@@ -3692,7 +3735,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
             if wapus:GetValue("Silent Aim", "Enabled") and (wapus:GetValue("Silent Aim", "Hit Chance") >= chanceOne) then
                 local target, entry, part = getClosest(silentaimfov.Position, wapus:GetValue("Silent Aim", "Use FOV") and silentaimfov.Radius, wapus:GetValue("Silent Aim", "Use Dead FOV") and silentaimdeadfov.Radius, wapus:GetValue("Silent Aim", "Visible Check"), (wapus:GetValue("Silent Aim", "Head Shot Chance") >= chanceTwo) and "Head" or "Torso")
-                
+
                 if target then
                     local player = entry._player
 
@@ -3726,7 +3769,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                         tracer.Shape = Enum.PartType.Cylinder
                         tracer.CFrame = (CFrame.new(origin, target) * CFrame.Angles(0, math.rad(90), 0)) * CFrame.new(Vector3.new(distance * 0.5, 0, 0))
                         tracer.Parent = ignore
-                        
+
                         task.delay(wapus:GetValue("World Visuals", "Duration"), function()
                             local step = (1 - tracer.Transparency) / 10
 
@@ -3734,12 +3777,12 @@ LPH_JIT_MAX(function() -- Main Cheat
                                 tracer.Transparency = tracer.Transparency + step
                                 task.wait(0.05)
                             end
-                            
+
                             tracer:Destroy()
                         end)
                     end
                 end
-                
+
                 if wapus:GetValue("World Visuals", "Impact Points") then
                     for wall = 1, #hits do
                         local point = Instance.new("Part")
@@ -3752,7 +3795,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                         point.Shape = Enum.PartType.Ball
                         point.Position = hits[wall]
                         point.Parent = ignore
-                        
+
                         task.delay(wapus:GetValue("World Visuals", "Duration"), function()
                             local step = (1 - point.Transparency) / 10
 
@@ -3760,7 +3803,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                                 point.Transparency = point.Transparency + step
                                 task.wait(0.05)
                             end
-                            
+
                             point:Destroy()
                         end)
                     end
@@ -3821,7 +3864,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         else
             frontLayer.ImageTransparency = 0
             rearLayer.ImageTransparency = 0
-            
+
             for layerIndex = 1, 2 do
                 local layer = layerIndex == 1 and frontLayer or rearLayer
 
@@ -3855,7 +3898,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 self._magCount = self._spareCount
                 self._spareCount = 0
             end
-            
+
             send(network, "reload")
 
             return
@@ -3888,7 +3931,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         if aimbotting then -- or wapus:GetValue("Gun Mods", "No Camera Sway") then
             local controller = weaponInterface.getActiveWeaponController()
             local weapon = controller and controller:getActiveWeapon()
-            
+
             return (weapon and weapon._blackScoped and CFrame.identity) or fromAxisAngle(x, y, z)
         end
 
@@ -3924,44 +3967,44 @@ LPH_JIT_MAX(function() -- Main Cheat
                 if class == playerDataUtils.getClassData(playerClient.getPlayerData()).curclass then
                     for slot, name in weapons do
                         local displayname = data.displayname or data.name
-        
+
                         if name == displayname then
                             local realData = contentDatabase.getWeaponData(realWeapons[class][slot])
                             local firecap = realData.firecap or ((realData.variablefirerate and math.max(table.unpack(realData.firerate))) or realData.firerate)
-        
+
                             if data.variablefirerate then
                                 local newFireRates = {}
-        
+
                                 for firerateIndex, firerate in data.firerate do
                                     newFireRates[firerateIndex] = math.min(firerate, firecap)
                                 end
-        
+
                                 data.firerate = newFireRates
                             elseif data.firerate > firecap then
                                 data.firerate = firecap
                             end
-        
+
                             if data.firecap and data.firecap > firecap then
                                 data.firecap = firecap
                             end
-        
+
                             if data.magsize > realData.magsize then
                                 data.magsize = realData.magsize
                                 data.sparerounds = realData.sparerounds
                             else
                                 data.sparerounds = (realData.magsize + realData.sparerounds) - data.magsize
                             end
-        
+
                             if data.pelletcount ~= realData.pelletcount then
                                 data.pelletcount = realData.pelletcount
                             end
-        
+
                             if data.penetrationdepth > realData.penetrationdepth then
                                 data.penetrationdepth = realData.penetrationdepth
                             end
-        
+
                             data.bulletspeed = realData.bulletspeed
-        
+
                             break
                         end
                     end
@@ -4009,8 +4052,20 @@ LPH_JIT_MAX(function() -- Main Cheat
         if aimbotting or wapus:GetValue("Gun Mods", "No Camera Sway") then
             mainStep(self, 0)
             self._lookDt = dt
-            return
         end
+
+        if wapus:GetValue('Gun Mods', 'No Camera Bob') then
+            local characterObject = charInterface.getCharacterObject();
+            local oldSpeed = characterObject._speed;
+
+            characterObject._speed = 0;
+            mainStep(self, dt);
+            characterObject._speed = oldSpeed;
+        end;
+
+        if aimbotting or wapus:GetValue("Gun Mods", "No Camera Sway") or wapus:GetValue('Gun Mods', 'No Camera Bob') then
+            return;
+        end;
 
         return mainStep(self, dt)
     end)
@@ -4100,10 +4155,10 @@ LPH_JIT_MAX(function() -- Main Cheat
                 end
             end
         end
-        
+
         return ownsWeapon(player, wepName)
     end
-    
+
     local playSoundId = audioSystem.playSoundId
     function audioSystem.playSoundId(assetId, priority, volume, pitch, part, maxPartDist, pitchRange, randomPitch, emitterSize, rollOffMode, playOnRemove, looped)
         if wapus:GetValue("Sounds", "Shoot Sound") ~= "None" then
@@ -4162,7 +4217,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
         return breakwindow(part, receiveWindow, netTime)
     end
-    
+
     local setBaseWalkSpeed = charObject.setBaseWalkSpeed
     function charObject:setBaseWalkSpeed(speed)
         newSpawnCache.walkSpeed = newSpawnCache.walkSpeed or speed
@@ -4200,7 +4255,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     --    if not state and charInterface.isAlive() then
     --        local object = charInterface.getCharacterObject()
     --        local rootPart = object and object:getRealRootPart()
-    --        
+    --
     --        if rootPart and rootPart.Anchored then
     --            rootPart.Anchored = false
     --        end
@@ -4626,8 +4681,12 @@ LPH_JIT_MAX(function() -- Main Cheat
         return startvotekick(username, delay, votes)
     end
 
-    local lastSpamIndex
+    local lastSpamIndex;
+    local globalChannel = game:GetService("TextChatService").TextChannels.Global;
     local function chatSpam() -- idk why this doesnt work on some exploits
+        -- 05/18/25
+        -- hello pf uses shitty chat now
+
         if wapus:GetValue("Chat Spam", "Enabled") then
             local list = chatSpamLists[wapus:GetValue("Chat Spam", "Spam List")]
             local newSpamIndex = 1
@@ -4636,7 +4695,8 @@ LPH_JIT_MAX(function() -- Main Cheat
                 repeat newSpamIndex = math.random(1, #list) until newSpamIndex ~= lastSpamIndex
             end
 
-            network:send("sendChatMessage", list[newSpamIndex], wapus:GetValue("Chat Spam", "Team Chat"))
+            --network:send("sendChatMessage", list[newSpamIndex], wapus:GetValue("Chat Spam", "Team Chat"))
+            globalChannel:SendAsync(list[newSpamIndex]);
             lastSpamIndex = newSpamIndex
         end
 
@@ -4693,7 +4753,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                         for entryIndex = 1, #closestCharacters do
                             local position = closestCharacters[entryIndex]._receivedPosition
                             local targetPlayer = closestCharacters[entryIndex]._player
-                            
+
                             if position then
                                 --local path = astar:findpath(newSpawnCache.lastUpdate, position, 9.9, 15)
                                 local result, data = pathfinding.floorAStar({
@@ -4781,7 +4841,7 @@ LPH_JIT_MAX(function() -- Main Cheat
         end
     end
 
-    --            --Box handles 
+    --            --Box handles
     --            local hasCham = character.Head:FindFirstChild("Box")
     --            if settings.boxHandleChams then
     --                for partName, part in character do
@@ -4809,28 +4869,28 @@ LPH_JIT_MAX(function() -- Main Cheat
     function thirdPersonObject.new(player, a, playerReplicationObject)
         local thirdPerson = newThirdPerson(player, a, playerReplicationObject)
         thirdPerson._rootPart.Name = "HumanoidRootPart"
-    
+
         for partName, part in thirdPerson._characterModelHash do
             part.Name = partName
             part.Size = desktopHitBox[partName].size
         end
-    
+
         return thirdPerson
     end
-    
+
     replicationInterface.operateOnAllEntries(function(player, entry)
         local thirdPerson = entry:getThirdPersonObject()
-    
+
         if thirdPerson then
             thirdPerson._rootPart.Name = "HumanoidRootPart"
-    
+
             for partName, part in thirdPerson:getCharacterHash() do
                 part.Name = partName
                 part.Size = desktopHitBox[partName].size
             end
         end
     end)
-    
+
     local espInterface = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Sirius/refs/heads/request/library/sense/source.lua"))()
     espInterface.teamSettings = {
         enemy = {
@@ -4928,29 +4988,29 @@ LPH_JIT_MAX(function() -- Main Cheat
             chamsOutlineColor = { Color3.new(0,1,0), 0 }
         }
     }
-    
+
     espInterface.getCharacter = LPH_NO_VIRTUALIZE(function(player)
         local playerReplicationObject = replicationInterface.getEntry(player)
         local thirdPerson = playerReplicationObject:isReady() and playerReplicationObject._smoothReplication._prevFrameTime and playerReplicationObject and playerReplicationObject:getThirdPersonObject()
         return thirdPerson and thirdPerson:getCharacterModel(), thirdPerson and thirdPerson:getRootPart()
     end)
-    
+
     espInterface.getHealth = LPH_NO_VIRTUALIZE(function(player, character)
         local playerReplicationObject = replicationInterface.getEntry(player)
         return playerReplicationObject:getHealth(), 100
     end)
-    
+
     espInterface.getWeapon = LPH_NO_VIRTUALIZE(function(player)
         local playerReplicationObject = replicationInterface.getEntry(player)
         local playerWeaponObject = playerReplicationObject:getWeaponObject()
-    
+
         if playerReplicationObject:isAlive() and playerWeaponObject then
             return playerWeaponObject.weaponName
         end
-    
+
         return "Unknown"
     end)
-    
+
     espInterface.Load()
 
     callbackList["Enemy ESP%%Enabled"] = function(state)
@@ -5076,7 +5136,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     callbackList["Enemy ESP%%Health Number Color"] = function(state)
         espInterface.teamSettings.enemy.healthTextColor[1] = state
     end
-    
+
     callbackList["Enemy ESP%%Text Outlines"] = function(state)
         espInterface.teamSettings.enemy.nameOutline = state
         espInterface.teamSettings.enemy.weaponOutline = state
@@ -5110,7 +5170,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
 
 
-    
+
 
     callbackList["Team ESP%%Enabled"] = function(state) -- why doesnt this workkk nigga
         espInterface.teamSettings.friendly.enabled = state
@@ -5235,7 +5295,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     callbackList["Team ESP%%Health Number Color"] = function(state)
         espInterface.teamSettings.friendly.healthTextColor[1] = state
     end
-    
+
     callbackList["Team ESP%%Text Outlines"] = function(state)
         espInterface.teamSettings.friendly.nameOutline = state
         espInterface.teamSettings.friendly.weaponOutline = state
@@ -5277,7 +5337,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             if state then
                 local modelId = "rbxassetid://" .. string.gsub(state, "rbxassetid://", "")
                 customModel = game:GetObjects(modelId)
-        
+
                 if (not customModel) or (not customModel[1]) or (type(customModel[1]) ~= "userdata") then
                     customModel = nil
                 else
@@ -5323,8 +5383,8 @@ LPH_JIT_MAX(function() -- Main Cheat
             chanceOne = math.random(1, 100)
             chanceTwo = math.random(1, 100)
             lastRandom = clockTime
-        end
-        
+        end;
+
         if controller and weapon then
             local isHidden = (hidden or weapon._blackScoped or ((wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character")) and (wapus:GetValue("Third Person", "Show Character While Aiming") or not aiming)))
             if isHidden then
@@ -5338,29 +5398,17 @@ LPH_JIT_MAX(function() -- Main Cheat
 
         if customModel and rootPart then
             local part = customModel.ClassName == "Model" and customModel.PrimaryPart or customModel
-            customModel.CFrame = rootPart.CFrame * CFrame.new(wapus:GetValue("Custom Model", "Asset Offset X"), wapus:GetValue("Custom Model", "Asset Offset Y"), wapus:GetValue("Custom Model", "Asset Offset Z"))
+            part.CFrame = rootPart.CFrame * CFrame.new(wapus:GetValue("Custom Model", "Asset Offset X"), wapus:GetValue("Custom Model", "Asset Offset Y"), wapus:GetValue("Custom Model", "Asset Offset Z"))
         end
-
-        replicationInterface.operateOnAllEntries(function(player, entry)
-            if player.Team ~= localplayer.Team then
-                local character = entry._thirdPersonObject and entry._thirdPersonObject._characterModelHash
-                movementCache.position[player] = movementCache.position[player] or {}
-
-                if character then
-                    table.insert(movementCache.position[player], 1, character.Head.Position)
-                    table.remove(movementCache.position[player], 16)
-                end
-            end
-        end)
-
-        table.insert(movementCache.time, 1, clockTime)
-        table.remove(movementCache.time, 16)
 
         if wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character") then
             deltaTime = deltaTime + ndt
 
             if rootPart then
-                local position = rootPart.Position
+                local position = rootPart.Position;
+                if wapus:GetValue('Anti Aim', 'Fake Lag') then
+                    position = newSpawnCache.lastUpdate;
+                end;
                 lastPos = lastPos or position
                 local velocity = (position - lastPos) / deltaTime
                 deltaTime = 0
@@ -5368,35 +5416,46 @@ LPH_JIT_MAX(function() -- Main Cheat
                 if currentObj or started then
                     if started then
                         local classData = playerClient.getPlayerData().settings.classdata
+
+                        -- 05/19/25
+                        fakeRepObject._player = localplayer;
                         fakeRepObject:spawn(nil, classData[classData.curclass])
+
                         currentObj = fakeRepObject._thirdPersonObject
                         fakeRepObject:setActiveIndex(1)
-                        currentObj:buildWeapon(1)
-                        currentObj:buildWeapon(2)
-                        currentObj:buildWeapon(3)
+                        for i = 1, 3 do
+                            if fakeRepObject:getWeaponObjects()[i] then
+                                currentObj:buildWeapon(i)
+                            end;
+                        end;
 
                         if wapus:GetValue("More Chams", "Third Person Character Chams") then
-                            task.delay(0.15, function()
-                                local _, uncache = cham.new(currentObj._character, {
-                                    Transparency = wapus:GetValue("More Chams", "Character Transparency") * 0.01,
-                                    Material = Enum.Material[wapus:GetValue("More Chams", "Character Material")],
-                                    Color = wapus:GetValue("More Chams", "Character Color")
-                                }, false, true, false)
-                                objectChamUncache = uncache
-                            end)
+                            local _, uncache = cham.new(currentObj._character, {
+                                Transparency = wapus:GetValue("More Chams", "Character Transparency") * 0.01,
+                                Material = Enum.Material[wapus:GetValue("More Chams", "Character Material")],
+                                Color = wapus:GetValue("More Chams", "Character Color")
+                            }, false, true, false)
+                            objectChamUncache = uncache;
                         end
 
                         if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Anti Aim", "Force Stance") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") and currentObj then
                             currentObj:setStance(string.lower(wapus:GetValue("Anti Aim", "Set Stance")))
                         end
                     end
-                    
+
                     local angles = cameraInterface:getActiveCamera():getAngles()
                     if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Third Person", "Apply Anti Aim To Character") then
                         angles = applyAAAngles(angles)
                     end
-                    
+
                     local tickTime = tick()
+
+                    fakeRepObject._posspring.t = position; -- tp... tpbb?? alextpb????? if you see this.. message tpbb on discord "you suck at deepwoken"
+                    fakeRepObject._posspring.p = position;
+
+                    fakeRepObject._lookangles.t = angles; -- incase interpolation breaks on smooth replication we will still have our third person not get fucked
+                    fakeRepObject._lookangles.p = angles;
+
                     fakeRepObject._smoothReplication:receive(clockTime, tickTime, {
                         t = tickTime,
                         position = position,
@@ -5404,7 +5463,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                         angles = angles,
                         barrelAngles = Vector3.zero,
                         breakcount = 0
-                    }, false)
+                    }, true);
 
                     fakeRepObject._updaterecieved = true
                     fakeRepObject._receivedPosition = position
@@ -5436,6 +5495,150 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
+        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All (May Despawn)") then --  and newSpawnCache.hasPinged
+            --[[if weapon and weapon._weaponData then
+                weapon:shoot(true)
+            end]]
+
+            if weapon and weapon._weaponData and newSpawnCache.lastUpdate and not teleporting then
+                local origin = newSpawnCache.lastUpdate
+                local closestPlayers = getClosestPlayers(origin, false, wapus:GetValue("Rage Bot", "Only Shoot Target Status"), wapus:GetValue("Rage Bot", "Whitelist Friendly Status"))
+                local data = weapon._weaponData
+                local penetration = data.penetrationdepth
+                local speed = data.bulletspeed
+
+                if closestPlayers and penetration and speed and (weapon._magCount > 0 or weapon._spareCount > 0) then
+                    for playerIndex = 1, #closestPlayers do
+                        local entry = closestPlayers[playerIndex]
+                        local newOrigin, newTarget, velocity, hitTime = scanPositions(origin, entry._receivedPosition, publicSettings.bulletAcceleration, speed, penetration)
+
+                        if newOrigin then
+                            if weapon._magCount < 1 then
+                                if weapon._spareCount >= data.magsize then
+                                    weapon._magCount = data.magsize
+                                    weapon._spareCount = weapon._spareCount - weapon._magCount
+                                else
+                                    weapon._magCount = weapon._spareCount
+                                    weapon._spareCount = 0
+                                end
+
+                                send(network, "reload")
+                            end
+
+                            local bullets = {}
+                            local bulletData = {
+                                camerapos = origin,
+                                firepos = newOrigin,
+                                bullets = bullets
+                            }
+
+                            for _ = 1, (data.pelletcount or 1) do
+                                --local ticket = debug.getupvalue(firearmObject.fireRound, 11) + 1
+                                table.insert(bullets, {velocity.Unit, ticket + ticketAddition})
+                                --debug.setupvalue(firearmObject.fireRound, 11, ticket)
+                                ticketAddition = ticketAddition + 1
+                            end
+
+                            send(network, "newbullets", weapon.uniqueId, bulletData, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
+
+                            for bulletIndex = 1, #bullets do
+                                local theTicket = bullets[bulletIndex][2]
+                                send(network, "bullethit", weapon.uniqueId, entry._player, newTarget, "Head", theTicket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
+                                --ticketCache[ticket] = true
+                            end
+
+                            if wapus:GetValue("Rage Bot", "Shoot Effects") and weapon._barrelPart then
+                                local barrel = weapon._barrelPart
+
+                                effects.muzzleflash(barrel, data.hideflash, 0.9)
+
+                                if data.type == "SNIPER" then
+                                    audioSystem.play("metalshell", 0.1)
+                                elseif data.type == "SHOTGUN" then
+                                    audioSystem.play("shotWeaponshell", 0.2)
+                                elseif data.type == "REVOLVER" and not data.caselessammo then
+                                    audioSystem.play("metalshell", 0.15, 0.8)
+                                end
+
+                                if not weapon._aiming then
+                                    crosshairsInterface.fireImpulse(data.crossexpansion)
+                                end
+
+                                if data.sniperbass then
+                                    audioSystem.play("1PsniperBass", 0.75)
+                                    audioSystem.play("1PsniperEcho", 1)
+                                end
+
+                                audioSystem.playSoundId(data.firesoundid, 2, data.firevolume, data.firepitch, barrel, nil, 0, 0.05)
+                            end
+
+                            local fireDelay = 60 / (data.variablefirerate and data.firerate[weapon._firemodeIndex] or data.firerate)
+
+                            --if wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
+                            --    if (newSpawnCache.currentAddition + fireDelay) <= timeRange then
+                            --        newSpawnCache.currentAddition += fireDelay
+                            --        newSpawnCache.lastOffsetUpdate = network.getTime()
+                            --        fireDelay = 0
+                            --        newSpawnCache.hasPinged = false
+                            --    end
+                            --end
+
+                            nextShot = clockTime + fireDelay
+                            weapon._magCount = weapon._magCount - 1
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end)))
+
+    table.insert(connectionList, runService.Stepped:Connect(function(time, ndt)
+        local currentCharObject = charInterface.getCharacterObject()
+        local rootPart = currentCharObject and currentCharObject:getRealRootPart()
+        local clockTime = os.clock()
+
+        local controller = weaponInterface.getActiveWeaponController()
+        local weapon = controller and controller:getActiveWeapon()
+        local aiming = weapon and weapon._aiming
+
+        if clockTime > lastRandom + 1 then
+            chanceOne = math.random(1, 100)
+            chanceTwo = math.random(1, 100)
+            lastRandom = clockTime
+        end
+
+        if controller and weapon then
+            local isHidden = (hidden or weapon._blackScoped or ((wapus:GetValue("Third Person", "Enabled") and wapus:GetValue("Third Person", "Show Character")) and (wapus:GetValue("Third Person", "Show Character While Aiming") or not aiming)))
+            if isHidden then
+                weapon._isHidden = false -- shit fix lmao
+                weapon:hideModel()
+                --characterobject:getArmModels()
+            else
+                weapon:showModel()
+            end
+        end
+
+        if customModel and rootPart then
+            local part = customModel.ClassName == "Model" and customModel.PrimaryPart or customModel
+            customModel.CFrame = rootPart.CFrame * CFrame.new(wapus:GetValue("Custom Model", "Asset Offset X"), wapus:GetValue("Custom Model", "Asset Offset Y"), wapus:GetValue("Custom Model", "Asset Offset Z"))
+        end
+
+        replicationInterface.operateOnAllEntries(function(player, entry)
+            if player.Team ~= localplayer.Team then
+                local character = entry._thirdPersonObject and entry._thirdPersonObject._characterModelHash
+                movementCache.position[player] = movementCache.position[player] or {}
+
+                if character then
+                    table.insert(movementCache.position[player], 1, character.Head.Position)
+                    table.remove(movementCache.position[player], 16)
+                end
+            end
+        end)
+
+        table.insert(movementCache.time, 1, clockTime)
+        table.remove(movementCache.time, 16)
+
         if wapus:GetValue("Anti Aim", "Enabled (May Cause Despawning)") and wapus:GetValue("Anti Aim", "Jitter") and rootPart and (clockTime - lastJitter) > (1 / wapus:GetValue("Anti Aim", "Jitter Speed") / 2) then
             lastJitterStarted = not lastJitterStarted
             send(network, "aim", lastJitterStarted)
@@ -5463,6 +5666,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             end
         end
 
+        --[[
         if false then --wapus:GetValue("Movement", "Fly") and rootPart then
             local cframe = camera.CFrame
             local direction = Vector3.zero
@@ -5500,6 +5704,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 rootPart.Velocity = direction.Unit * wapus:GetValue("Movement", "Fly Speed")
             end
         end
+        ]]
 
         if wapus:GetValue("Hit Boxes", "Enabled") then
             replicationInterface.operateOnAllEntries(function(player, entry)
@@ -5581,107 +5786,15 @@ LPH_JIT_MAX(function() -- Main Cheat
                 backtrackTime = clockTime
             end
         end
+    end));
 
-        if wapus:GetValue("Rage Bot", "Enabled") and clockTime > nextShot and not roundSystem.roundLock and not wapus:GetValue("Knife Bot", "Kill All (May Despawn)") then --  and newSpawnCache.hasPinged
-            --[[if weapon and weapon._weaponData then
-                weapon:shoot(true)
-            end]]
-            
-            if weapon and weapon._weaponData and newSpawnCache.lastUpdate and not teleporting then
-                local origin = newSpawnCache.lastUpdate
-                local closestPlayers = getClosestPlayers(origin, false, wapus:GetValue("Rage Bot", "Only Shoot Target Status"), wapus:GetValue("Rage Bot", "Whitelist Friendly Status"))
-                local data = weapon._weaponData
-                local penetration = data.penetrationdepth
-                local speed = data.bulletspeed
-                
-                if closestPlayers and penetration and speed and (weapon._magCount > 0 or weapon._spareCount > 0) then
-                    for playerIndex = 1, #closestPlayers do
-                        local entry = closestPlayers[playerIndex]
-                        local newOrigin, newTarget, velocity, hitTime = scanPositions(origin, entry._receivedPosition, publicSettings.bulletAcceleration, speed, penetration)
-    
-                        if newOrigin then
-                            if weapon._magCount < 1 then
-                                if weapon._spareCount >= data.magsize then
-                                    weapon._magCount = data.magsize
-                                    weapon._spareCount = weapon._spareCount - weapon._magCount
-                                else
-                                    weapon._magCount = weapon._spareCount
-                                    weapon._spareCount = 0
-                                end
-    
-                                send(network, "reload")
-                            end
-    
-                            local bullets = {}
-                            local bulletData = {
-                                camerapos = origin,
-                                firepos = newOrigin,
-                                bullets = bullets
-                            }
-    
-                            for _ = 1, (data.pelletcount or 1) do
-                                --local ticket = debug.getupvalue(firearmObject.fireRound, 11) + 1
-                                table.insert(bullets, {velocity.Unit, ticket + ticketAddition})
-                                --debug.setupvalue(firearmObject.fireRound, 11, ticket)
-                                ticketAddition = ticketAddition + 1
-                            end
-    
-                            send(network, "newbullets", weapon.uniqueId, bulletData, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
-    
-                            for bulletIndex = 1, #bullets do
-                                local theTicket = bullets[bulletIndex][2]
-                                send(network, "bullethit", weapon.uniqueId, entry._player, newTarget, "Head", theTicket, network.getTime() + newSpawnCache.latency + newSpawnCache.currentAddition)
-                                --ticketCache[ticket] = true
-                            end
+    local aimTime;
 
-                            if wapus:GetValue("Rage Bot", "Shoot Effects") and weapon._barrelPart then
-                                local barrel = weapon._barrelPart
-
-                                effects.muzzleflash(barrel, data.hideflash, 0.9)
-
-                                if data.type == "SNIPER" then
-                                    audioSystem.play("metalshell", 0.1)
-                                elseif data.type == "SHOTGUN" then
-                                    audioSystem.play("shotWeaponshell", 0.2)
-                                elseif data.type == "REVOLVER" and not data.caselessammo then
-                                    audioSystem.play("metalshell", 0.15, 0.8)
-                                end
-                        
-                                if not weapon._aiming then
-                                    crosshairsInterface.fireImpulse(data.crossexpansion)
-                                end
-                        
-                                if data.sniperbass then
-                                    audioSystem.play("1PsniperBass", 0.75)
-                                    audioSystem.play("1PsniperEcho", 1)
-                                end
-                        
-                                audioSystem.playSoundId(data.firesoundid, 2, data.firevolume, data.firepitch, barrel, nil, 0, 0.05)
-                            end
-    
-                            local fireDelay = 60 / (data.variablefirerate and data.firerate[weapon._firemodeIndex] or data.firerate)
-    
-                            --if wapus:GetValue("Rage Bot", "Firerate (May Cause Kicking)") then
-                            --    if (newSpawnCache.currentAddition + fireDelay) <= timeRange then
-                            --        newSpawnCache.currentAddition += fireDelay
-                            --        newSpawnCache.lastOffsetUpdate = network.getTime()
-                            --        fireDelay = 0
-                            --        newSpawnCache.hasPinged = false
-                            --    end
-                            --end
-    
-                            nextShot = clockTime + fireDelay
-                            weapon._magCount = weapon._magCount - 1
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end)))
-    
-    local aimTime
+    local lastUpdate = tick();
     table.insert(connectionList, runService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function(deltaTime)
+        if tick() - lastUpdate < 1/30 then return end;
+        lastUpdate = tick();
+
         local controller = weaponInterface.getActiveWeaponController()
         local weapon = controller and controller:getActiveWeapon()
         local aiming = weapon and weapon._aiming
@@ -5723,7 +5836,7 @@ LPH_JIT_MAX(function() -- Main Cheat
                 circlePos = Vector2.new(barrel.X, barrel.Y)
             end
         end
-        
+
         circlePos = circlePos or camera.ViewportSize * 0.5
         aimbotfov.Position = circlePos
         aimbotdeadfov.Position = circlePos
@@ -5932,7 +6045,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
         return names
     end
-    
+
     local function loadConfig(config)
         for indexes, value in config do
             local section, name = table.unpack(string.split(indexes, "%%"))
@@ -6010,8 +6123,9 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local gunmods = legit:CreateSection("Gun Mods", true, "half")
 
     local ragebot = rage:CreateSection("Rage Bot", false, "half")
-    local knifebot = rage:CreateSection("Knife Bot", false, "half")
-    local antiaim = rage:CreateSection("Anti Aim", true, "whole")
+    local knifebot = rage:CreateSection("Knife Bot", false, "half");
+    local antiaim = rage:CreateSection("Anti Aim", true, "whole");
+    local fakelag = antiaim
 
     local enemyesp = visuals:CreateSection("Enemy ESP", false, "whole")
     --local teamesp = enemyesp:AddSection("Team ESP")
@@ -6029,7 +6143,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local chatspam = misc:CreateSection("Chat Spam", true, "third")
     local hopper = misc:CreateSection("Server Hopper", true, "third")
     --local votekick = hopper:AddSection("Votekick")
-    
+
     aimbot:AddToggle("Enabled", false, getCallback("Aim Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     aimbot:AddToggle("Visible Check", false, getCallback("Aim Bot%%Visible Check"))
     aimbot:AddSlider("Smoothness", 0, 0, 0.99, 0.01, "x", getCallback("Aim Bot%%Smoothness"))
@@ -6040,13 +6154,13 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     aimbot:AddToggle("Use Dead FOV", false, getCallback("Aim Bot%%Use Dead FOV"))
     aimbot:AddSlider("Dead FOV Radius", 100, 1, 1000, 1, "px", getCallback("Aim Bot%%Dead FOV Radius"))
     aimbot:AddToggle("Show Dead FOV Circle", false, getCallback("Aim Bot%%Show Dead FOV Circle")):AddKeyBind(nil, "Dead FOV Key Bind"):AddColorPicker("Dead FOV Circle Color", Color3.new(1, 1, 1), getCallback("Aim Bot%%Dead FOV Circle Color"))
-    
+
     fovsettings:AddToggle("FOV Follows Recoil", false, getCallback("FOV Settings%%FOV Follows Recoil"))
     fovsettings:AddToggle("Dynamic FOV", false, getCallback("FOV Settings%%Dynamic FOV"))
     --fovsettings:AddSlider("Circle Side Number", 48, 3, 64, 1, "", getCallback("FOV Settings%%Circle Side Number"))
     fovsettings:AddSlider("Circle Opacity", 100, 1, 100, 1, "%", getCallback("FOV Settings%%Circle Opacity"))
     fovsettings:AddToggle("Fill Circles", false, getCallback("FOV Settings%%Fill Circles"))
-    
+
     silentaim:AddToggle("Enabled", false, getCallback("Silent Aim%%Enabled")):AddKeyBind(nil, "Key Bind")
     silentaim:AddToggle("Visible Check", false, getCallback("Silent Aim%%Visible Check"))
     --silentaim:AddToggle("Undetected", true, getCallback("Silent Aim%%Undetected"))
@@ -6058,26 +6172,27 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     silentaim:AddToggle("Use Dead FOV", false, getCallback("Silent Aim%%Use Dead FOV"))
     silentaim:AddSlider("Dead FOV Radius", 100, 1, 1000, 1, "px", getCallback("Silent Aim%%Dead FOV Radius"))
     silentaim:AddToggle("Show Dead FOV Circle", false, getCallback("Silent Aim%%Show Dead FOV Circle")):AddKeyBind(nil, "Dead FOV Key Bind"):AddColorPicker("Dead FOV Circle Color", Color3.new(1, 1, 1), getCallback("Silent Aim%%Dead FOV Circle Color"))
-    
+
     hitboxes:AddToggle("Enabled", false, getCallback("Hit Boxes%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Color", Color3.new(0.1, 0.1, 1), getCallback("Hit Boxes%%Color"))
     hitboxes:AddDropdown("Hit Part", "Head", {"Head", "Torso"}, getCallback("Hit Boxes%%Hit Part"))
     hitboxes:AddSlider("Size", 20, 1, 20, 1, " Studs", getCallback("Hit Boxes%%Size"))
     hitboxes:AddSlider("Transparency", 50, 0, 100, 1, "%", getCallback("Hit Boxes%%Transparency"))
     hitboxes:AddDropdown("Material", "SmoothPlastic", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Hit Boxes%%Material"))
-    
+
     backtrack:AddToggle("Enabled", false, getCallback("Backtracking%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Character Color", Color3.new(0.1, 0.1, 1), getCallback("Backtracking%%Characters Color"))
     backtrack:AddSlider("Refresh Rate", 2, 1, 10, 1, " Characters/Second", getCallback("Backtracking%%Refresh Rate"))
     backtrack:AddSlider("Character Duration", 1, 0.1, 1, 0.1, " Seconds", getCallback("Backtracking%%Character Duration"))
     backtrack:AddSlider("Character Transparency", 50, 0, 100, 1, "%", getCallback("Backtracking%%Character Transparency"))
     backtrack:AddDropdown("Character Material", "ForceField", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Backtracking%%Character Material"))
     backtrack:AddToggle("Clone Character", true, getCallback("Backtracking%%Clone Character"))
-    
+
     gunmods:AddToggle("No Recoil", false, getCallback("Gun Mods%%No Recoil"))
     gunmods:AddToggle("No Spread", false, getCallback("Gun Mods%%No Spread"))
     gunmods:AddToggle("Small Crosshair", false, getCallback("Gun Mods%%Small Crosshair"))
     gunmods:AddToggle("No Crosshair", false, getCallback("Gun Mods%%No Crosshair"))
     gunmods:AddToggle("No Sniper Scope", false, getCallback("Gun Mods%%No Sniper Scope"))
     gunmods:AddToggle("No Camera Sway", false, getCallback("Gun Mods%%No Camera Sway"))
+    gunmods:AddToggle("No Camera Bob", false, getCallback("Gun Mods%%No Camera Bob"))
     gunmods:AddToggle("No Walk Sway", false, getCallback("Gun Mods%%No Walk Sway"))
     gunmods:AddToggle("No Gun Sway", false, getCallback("Gun Mods%%No Gun Sway"))
     gunmods:AddToggle("Instant Reload", false, getCallback("Gun Mods%%Instant Reload"))
@@ -6085,9 +6200,9 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     ragebot:AddToggle("Enabled", false, getCallback("Rage Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     ragebot:AddToggle("Shoot Effects", false, getCallback("Rage Bot%%Shoot Effects"))
     ragebot:AddToggle("Fire Position Scanning", false, getCallback("Rage Bot%%Fire Position Scanning"))
-    ragebot:AddSlider("Fire Position Offset", 9, 1, 15, 0.5, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
+    ragebot:AddSlider("Fire Position Offset", 9, 1, 15.9, 0.1, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
     ragebot:AddToggle("Hit Position Scanning", false, getCallback("Rage Bot%%Hit Position Scanning"))
-    ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.5, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
+    ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.1, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
     --ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
     ragebot:AddToggle("Only Shoot Target Status", false, getCallback("Rage Bot%%Only Shoot Target Status")):AddKeyBind(nil, "Target Key Bind")
     ragebot:AddToggle("Whitelist Friendly Status", true, getCallback("Rage Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
@@ -6110,9 +6225,16 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     antiaim:AddToggle("Jitter", false, getCallback("Anti Aim%%Jitter"))
     antiaim:AddSlider("Jitter Speed", 6, 0, 12, 1, " Shakes/Second", getCallback("Anti Aim%%Jitter Speed"))
     antiaim:AddToggle("Force Stance", false, getCallback("Anti Aim%%Force Stance"))
-    antiaim:AddDropdown("Set Stance", "Prone", {"Stand", "Crouch", "Prone"}, getCallback("Anti Aim%%Set Stance"))
+    antiaim:AddDropdown("Set Stance", "Prone", {"Stand", "Crouch", "Prone"}, getCallback("Anti Aim%%Set Stance"));
 
-    enemyesp:AddToggle("Enabled", true, getCallback("Enemy ESP%%Enabled")):AddKeyBind(nil, "Key Bind")
+    fakelag:AddToggle('Fake Lag', false, getCallback('Fake Lag%%Enabled')):AddKeyBind(nil, 'Key Bind');
+    fakelag:AddToggle('Randomize Position', false, getCallback('Fake Lag%%Randomize Position'));
+    fakelag:AddSlider('X-Axis Factor', 0, 0, 8.9, 1, ' Studs', getCallback('Fake Lag%%X-Axis Factor'));
+    fakelag:AddSlider('Z-Axis Factor', 0, 0, 8.9, 1, ' Studs', getCallback('Fake Lag%%Z-Axis Factor'));
+    fakelag:AddSlider('Refresh Distance', 5, 0, 8.9, 0.1, ' Studs', getCallback('Fake Lag%%Refresh Distance'));
+    fakelag:AddSlider('Refresh Rate', 1, 0, 10, 1, ' Seconds', getCallback('Fake Lag%%Refresh Rate'))
+
+    enemyesp:AddToggle("Enabled", true, getCallback("Enemy ESP%%Enabled"))
     enemyesp:AddToggle("Boxes", false, getCallback("Enemy ESP%%Boxes")):AddColorPicker("Box Color", Color3.fromRGB(0,255,255), getCallback("Enemy ESP%%Box Color"))
     enemyesp:AddSlider("Box Opacity", 100, 1, 100, 1, "%", getCallback("Enemy ESP%%Box Opacity"))
     --enemyesp:AddSlider("Box Thickness", 1, 1, 10, 1, " px", getCallback("Enemy ESP%%Box Thickness"))
@@ -6142,7 +6264,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     enemyesp:AddSlider("Highlight Fill Transparency", 50, 0, 100, 1, "%", getCallback("Enemy ESP%%Highlight Fill Opacity"))
     enemyesp:AddSlider("Highlight Outline Transparency", 0, 0, 100, 1, "%", getCallback("Enemy ESP%%Highlight Outline Opacity"))
     enemyesp:AddToggle("Highlight Visible Check", false, getCallback("Enemy ESP%%Highlight Visible Check"))
-    
+
     --[[teamesp:AddToggle("Enabled", true, getCallback("Team ESP%%Enabled")):AddKeyBind(nil, "Key Bind")
     teamesp:AddToggle("Boxes", false, getCallback("Team ESP%%Boxes")):AddColorPicker("Box Color", Color3.fromRGB(0,255,255), getCallback("Team ESP%%Box Color"))
     teamesp:AddSlider("Box Opacity", 100, 1, 100, 1, "%", getCallback("Team ESP%%Box Opacity"))
@@ -6180,7 +6302,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     chams:AddToggle("Gun Chams", false, getCallback("Chams%%Gun Chams")):AddColorPicker("Gun Color", Color3.new(0.1, 0.1, 1), getCallback("Chams%%Gun Color"))
     chams:AddSlider("Gun Transparency", 50, 0, 100, 1, "%", getCallback("Chams%%Gun Transparency"))
     chams:AddDropdown("Gun Material", "ForceField", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Chams%%Gun Material"))
-    
+
     morechams:AddToggle("Third Person Character Chams", false, getCallback("More Chams%%Third Person Character Chams")):AddColorPicker("Character Color", Color3.new(0.1, 0.1, 1), getCallback("More Chams%%Character Color"))
     morechams:AddSlider("Character Transparency", 50, 0, 100, 1, "%", getCallback("More Chams%%Character Transparency"))
     morechams:AddDropdown("Character Material", "ForceField", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("More Chams%%Character Material"))
@@ -6194,7 +6316,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     worldvisuals:AddSlider("Points Transparency", 50, 0, 100, 1, "%", getCallback("World Visuals%%Points Transparency"))
     worldvisuals:AddDropdown("Points Material", "ForceField", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("World Visuals%%Points Material"))
     worldvisuals:AddSlider("Duration", 4, 1, 5, 0.5, " Seconds", getCallback("World Visuals%%Duration"))
-    
+
     thirdperson:AddToggle("Enabled", false, getCallback("Third Person%%Enabled")):AddKeyBind(nil, "Key Bind")
     thirdperson:AddToggle("Show Character", false, getCallback("Third Person%%Show Character"))
     thirdperson:AddToggle("Show Character While Aiming", false, getCallback("Third Person%%Show Character While Aiming"))
@@ -6220,7 +6342,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     crosshair:AddSlider("Spin Speed", 0, 0, 3, 0.05, " Spins/Second", getCallback("Crosshair%%Spin Speed"))
     crosshair:AddToggle("Rainbow Crosshair", false, getCallback("Crosshair%%Rainbow Crosshair"))
     crosshair:AddSlider("Rainbow Speed", 0.5, 0, 3, 0.05, " Rainbows/Second", getCallback("Crosshair%%Rainbow Speed"))
-    
+
     movement:AddToggle("Walk Speed", false, getCallback("Movement%%Walk Speed")):AddKeyBind(nil, "Walk Bind")
     movement:AddSlider("Set Speed", 50, 10, 250, 1, " Studs/Second", getCallback("Movement%%Set Speed"))
     movement:AddToggle("Jump Power", false, getCallback("Movement%%Jump Power")):AddKeyBind(nil, "Jump Bind")
@@ -6257,14 +6379,14 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     chatspam:AddToggle("Enabled", false, getCallback("Chat Spam%%Enabled")):AddKeyBind(nil, "Key Bind")
     chatspam:AddDropdown("Spam List", "default.txt", chatListsFiles, getCallback("Chat Spam%%Spam List"))
     chatspam:AddSlider("Spam Delay", 2.51, 2.51, 5, 0.01, " Seconds", getCallback("Chat Spam%%Spam Delay"))
-    chatspam:AddToggle("Team Chat", false, getCallback("Chat Spam%%Team Chat"))
+    --chatspam:AddToggle("Team Chat", false, getCallback("Chat Spam%%Team Chat"))
 
     --hopper:AddToggle("Server Hop On Votekick", false, getCallback("Server Hopper%%Server Hop On Votekick"))
     hopper:AddButton("Server Hop", getCallback("Server Hopper%%Server Hop"))
     hopper:AddButton("Rejoin", getCallback("Server Hopper%%Rejoin"))
     hopper:AddButton("Copy Join Script", getCallback("Server Hopper%%Copy Join Script"))
     hopper:AddButton("Clear Cached Servers", getCallback("Server Hopper%%Clear Cached Servers"))
-    
+
     settings:CreatePlayerList({"Friendly", "Target"}, {
         status = function(player, status)
             playerStatus[player] = status
@@ -6306,7 +6428,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     configuration:AddButton("Update Config List", getCallback("Configuration%%Update Config List"))
     configuration:AddTextBox("Config Name", "New Config", getCallback("Configuration%%Config Name"))
     configuration:AddButton("Save Config", getCallback("Configuration%%Save Config"))
-    
+
     callbackList["Cheat Settings%%Show Keybind List"] = function(bool)
         if bool then
             task.delay(0.05, function()
@@ -6343,7 +6465,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
     if configExists then
         local config = httpService:JSONDecode(readfile(folderName .. "/cache/lastfile.json"))
-        
+
         if config["Cheat Settings%%Save Last Config"] ~= false then
             loadConfig(config)
         end
