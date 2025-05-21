@@ -3446,8 +3446,6 @@ LPH_JIT_MAX(function() -- Main Cheat
 
                         position += Vector3.new(xoff, yoff, zoff);
                     end;
-
-                    send(self, name, position, angles, (time - (1 / 70)) + newSpawnCache.latency + newSpawnCache.currentAddition)
                 else
                     return;
                 end;
