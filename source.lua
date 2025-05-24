@@ -15,6 +15,7 @@
     ~ Credits ~
 
     [ iRay ] - [ @896378803868295178 ] | Lead developer
+    [ ipufo ] - [ @819756897543389184 ] | Took over development since 5/19/2025
     [ Mickey ] - [ @953720095811719208 ] | Developed perfect trajectory function and ESP library
     [ Redpoint ] - [ @418013390024474624 ] | Contributed to triangles in the custom drawing api
 
