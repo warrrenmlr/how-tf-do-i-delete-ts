@@ -3,7 +3,7 @@
 -- known to work on wave, nihon, awp.gg, syn z, seliware, sirhurt
 local isLimited = ...
 local environment = identifyexecutor and identifyexecutor() or ""
-local source = game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/" .. (isLimited and "source-limited.lua" or "source.lua"))
+local source = game:HttpGet("https://raw.githubusercontent.com/warrrenmlr/wapus/refs/heads/main/" .. (isLimited and "source-limited.lua" or "source.lua"))
 if getfflag and string.find(string.lower(tostring(getfflag("DebugRunParallelLuaOnMainThread"))), "true") and not executed then
     loadstring(source)()
 elseif string.find(environment, "AWP") ~= nil and not executed then
@@ -31,7 +31,7 @@ elseif environment == "Nihon" and not executed then
         ]])
     end
 else
-    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/hook.lua") .. "task.wait(5);" .. source)
+    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/warrrenmlr/wapus/refs/heads/main/hook.lua") .. "task.wait(5);" .. source)
     setfflag("DebugRunParallelLuaOnMainThread", "True")
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
 end
