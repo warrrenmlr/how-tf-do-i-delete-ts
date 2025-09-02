@@ -2894,7 +2894,7 @@ LPH_JIT_MAX(function() -- Main Cheat
     --astar.interval = 12  --  8 to 16 is good
     --astar.ignorelist = {workspace.Players, camera, ignore, hitboxObjects, backtrackObjects}
 
-    local pathfinding = loadstring(game:HttpGet("https://raw.githubusercontent.com/warrrenmlr/wapus/refs/heads/main/pathfinding.lua"))() -- i didnt make this, i did fix it tho cuz pro
+    local pathfinding = loadstring(game:HttpGet("https://raw.githubusercontent.com/iRay888/wapus/refs/heads/main/pathfinding.lua"))() -- i didnt make this, i did fix it tho cuz pro
 
     local physicsignore = {workspace.Terrain, ignore, workspace.Players, camera, hitboxObjects, backtrackObjects}
     local raycastparameters = RaycastParams.new()
@@ -5801,13 +5801,7 @@ LPH_JIT_MAX(function() -- Main Cheat
 
         aimbotting = false
         if wapus:GetValue("Aim Bot", "Enabled") and aiming then
-            local target, entry, part = getClosest(
-                aimbotfov.Position,
-                wapus:GetValue("Aim Bot", "Use FOV") and aimbotfov.Radius,
-                wapus:GetValue("Aim Bot", "Use Dead FOV") and aimbotdeadfov.Radius,
-                wapus:GetValue("Aim Bot", "Visible Check"),
-                wapus:GetValue("Aim Bot", "Target Part")
-            )
+            local target, entry, part = getClosest(aimbotfov.Position, wapus:GetValue("Aim Bot", "Use FOV") and aimbotfov.Radius, wapus:GetValue("Aim Bot", "Use Dead FOV") and aimbotdeadfov.Radius, wapus:GetValue("Aim Bot", "Visible Check"), wapus:GetValue("Aim Bot", "Target Part"))
 
             if target and movementCache.position[entry._player][15] then
                 aimbotting = true
@@ -5815,37 +5809,65 @@ LPH_JIT_MAX(function() -- Main Cheat
 
                 local player = entry._player
                 local cameraObj = cameraInterface.getActiveCamera()
-
-                -- lead calc stays the same
-                local velocity = complexTrajectory(
-                    camera.CFrame * Vector3.new(0, 0, 0.5),
-                    publicSettings.bulletAcceleration,
-                    target,
-                    weapon._weaponData.bulletspeed or 10000,
-                    (movementCache.position[player][15] - movementCache.position[player][1]) / (movementCache.time[15] - movementCache.time[1])
-                )
-
-                -- convert to desired yaw/pitch
+                local velocity = complexTrajectory(camera.CFrame * Vector3.new(0, 0, 0.5), publicSettings.bulletAcceleration, target, weapon._weaponData.bulletspeed or 10000, (movementCache.position[player][15] - movementCache.position[player][1]) / (movementCache.time[15] - movementCache.time[1]))
                 local vx, vy = toanglesyx(velocity)
                 local cy = cameraObj._angles.y
-                local x  = (vx > cameraObj._maxAngle and cameraObj._maxAngle) or (vx < cameraObj._minAngle and cameraObj._minAngle) or vx
-                local y  = ( (vy + pi - cy) % tau ) - pi + cy
-                local targetAngles = Vector3.new(x, y, 0)
+                local x = vx > cameraObj._maxAngle and cameraObj._maxAngle or vx < cameraObj._minAngle and cameraObj._minAngle or vx
+                local y = (vy + pi - cy) % tau - pi + cy
+                local newangles = Vector3.new(x, y, 0)
+                local smoothing = wapus:GetValue("Aim Bot", "Smoothness")
 
-        -- === simplified smoothing (Lerp-like) ===
-        -- Treat "Smoothness" as the Lerp alpha per frame (AimSpeed). 0 = snap, 1 = instant.
-                local smoothing = wapus:GetValue("Aim Bot", "Smoothness") or 0
                 if smoothing ~= 0 then
-            -- clamp to [0,1] just like a Lerp alpha
-                    local alpha = math.clamp(smoothing, 0, 1)
-            -- move a fixed fraction toward target each frame (same feel as CFrame:Lerp)
-                    targetAngles = cameraObj._angles:lerp(targetAngles, alpha)
+                    newangles = cameraObj._angles:lerp(newangles, math.clamp(1 - smoothing + (clockTime - aimTime)^2, 0, 1))
                 end
-        -- ========================================
 
-        -- apply
-                cameraObj._delta  = (targetAngles - cameraObj._angles) / deltaTime
-                cameraObj._angles = targetAngles
+                cameraObj._delta = (newangles - cameraObj._angles) / deltaTime
+                cameraObj._angles = newangles
+            end
+        end
+        aimTime = aimbotting and aimTime
+
+        local circlePos
+        if wapus:GetValue("FOV Settings", "FOV Follows Recoil") then
+            local barrel = getBarrelLocation()
+
+            if barrel and barrel.Z > 0 then
+                circlePos = Vector2.new(barrel.X, barrel.Y)
+            end
+        end
+
+        circlePos = circlePos or camera.ViewportSize * 0.5
+        aimbotfov.Position = circlePos
+        aimbotdeadfov.Position = circlePos
+        silentaimfov.Position = circlePos
+        silentaimdeadfov.Position = circlePos
+
+        if wapus:GetValue("FOV Settings", "Dynamic FOV") then
+            local factor = not charInterface.isAlive() and 1 or (cameraInterface.getActiveCamera():getBaseFov() / camera.FieldOfView)
+            aimbotfov.Radius = wapus:GetValue("Aim Bot", "FOV Radius") * factor
+            aimbotdeadfov.Radius = wapus:GetValue("Aim Bot", "Dead FOV Radius") * factor
+            silentaimfov.Radius = wapus:GetValue("Silent Aim", "FOV Radius") * factor
+            silentaimdeadfov.Radius = wapus:GetValue("Silent Aim", "Dead FOV Radius") * factor
+        end
+
+        if wapus:GetValue("World Visuals", "Ambient") then
+            local color = wapus:GetValue("World Visuals", "Ambient Color")
+            lighting.Ambient = color
+            lighting.OutdoorAmbient = color
+        end
+
+        if wapus:GetValue("Crosshair", "Enabled") then
+            if (wapus:GetValue("Crosshair", "Spin Speed") > 0) or wapus:GetValue("Crosshair", "Follow Recoil") then
+                updateCrosshairPos()
+            end
+
+            if wapus:GetValue("Crosshair", "Rainbow Crosshair") then
+                local rainbow = Color3.fromHSV((clockTime * wapus:GetValue("Crosshair", "Rainbow Speed")) % 1, 1, 1)
+                crossdot.Color = rainbow
+                cross1.Color = rainbow
+                cross2.Color = rainbow
+                cross3.Color = rainbow
+                cross4.Color = rainbow
             end
         end
     end)))
